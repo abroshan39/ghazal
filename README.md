@@ -1,6 +1,12 @@
 # Ghazal: The library of persian poetry
 Ghazal is a library of persian poetry and a free and open-source software. Ghazal is written in C++ using the Qt framework. This software uses [Ganjoor](https://ganjoor.net) database. This branch here contains pre-built files for Windows and Linux ([AppImage](https://appimage.org)). Simply download the AppImage and run it on all linux distributions.
 
+![linux-01](app-screenshots/linux-01.png)
+
+![linux-02-dark](app-screenshots/linux-02-dark.png)
+
+![windows-01-abjad](app-screenshots/windows-01-abjad.gif)
+
 ## Building
 Linux (cmake):
 ```
