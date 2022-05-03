@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DownloadForm</class>
+ <widget class="QMainWindow" name="DownloadForm">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>704</width>
+    <height>416</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>Sahel</family>
+    <pointsize>11</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="layoutDirection">
+   <enum>Qt::RightToLeft</enum>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_7">
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QPushButton" name="btnSearchOnGanjoor">
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="text">
+           <string> جست‌وجو </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="text">
+           <string>مخزن:  </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit">
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="text">
+           <string>نحوهٔ نمایش:  </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="comboBox">
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>همه</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>فقط نصب‌نشده‌ها</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>فقط نصب‌شده‌ها</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_7">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_3">
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="text">
+           <string>نحوهٔ ذخیره‌سازی:  </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="comboBoxSave">
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="currentIndex">
+           <number>-1</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_5">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QCheckBox" name="notInstalledCheckBox">
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="text">
+           <string>انتخاب نصب‌نشده‌ها  </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="preInstalledCheckBox">
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="text">
+           <string>انتخاب نصب‌شده‌ها  </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="selectAllCheckBox">
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="text">
+           <string>انتخاب همه  </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="selectNoneCheckBox">
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="text">
+           <string>هیچکدام  </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QTableWidget" name="tableWidget">
+        <property name="font">
+         <font>
+          <family>Sahel FD</family>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="accessibleName">
+         <string>classFD</string>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::SingleSelection</enum>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectRows</enum>
+        </property>
+        <attribute name="horizontalHeaderStretchLastSection">
+         <bool>true</bool>
+        </attribute>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QLabel" name="labelSelectedCount">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <family>Sahel FD</family>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="accessibleName">
+           <string>classFDs</string>
+          </property>
+          <property name="text">
+           <string>انتخاب‌شده:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelSelectedSize">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <family>Sahel FD</family>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="accessibleName">
+           <string>classFDs</string>
+          </property>
+          <property name="text">
+           <string>حجم کل:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_6">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelDlInstalledCount">
+          <property name="font">
+           <font>
+            <family>Sahel FD</family>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="accessibleName">
+           <string>classFDs</string>
+          </property>
+          <property name="text">
+           <string>دانلود و نصب‌شده:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QLabel" name="labelPoetName">
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="text">
+           <string>در حال دانلود دیتابیس مربوط به:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelFinish">
+          <property name="accessibleName">
+           <string>classFinish</string>
+          </property>
+          <property name="text">
+           <string>پایان!</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QProgressBar" name="progressBarOne">
+          <property name="font">
+           <font>
+            <family>Courier New</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
+          <property name="value">
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProgressBar" name="progressBarAll">
+          <property name="font">
+           <font>
+            <family>Courier New</family>
+            <pointsize>9</pointsize>
+           </font>
+          </property>
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
+          <property name="value">
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QPushButton" name="btnDownload">
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="text">
+           <string>دانلود</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnCancel">
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="text">
+           <string>توقف</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnClose">
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="text">
+           <string>بستن</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEditSaveLocation">
+          <property name="font">
+           <font>
+            <family>Sahel</family>
+            <pointsize>10</pointsize>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(21, 21, 21);</string>
+          </property>
+          <property name="text">
+           <string>databasePath</string>
+          </property>
+          <property name="frame">
+           <bool>false</bool>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelSaveLocation">
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="text">
+           <string>:محل ذخیره‌سازی</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
