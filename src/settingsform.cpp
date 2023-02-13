@@ -3,7 +3,6 @@
     Publisher: Rosybit
     Url: http://www.rosybit.com
     GitHub: https://github.com/abroshan39/ghazal
-    Version: 1.4
     Author: Aboutaleb Roshan [ab.roshan39@gmail.com]
     License: MIT License
 */
@@ -13,6 +12,8 @@
 #include "appthemes.h"
 
 #include <QFileDialog>
+#include <QDir>
+#include <QFileInfo>
 #include <QFontDialog>
 #include <QFont>
 
@@ -31,17 +32,23 @@ SettingsForm::SettingsForm(AppSettings *appSettings, QWidget *parent) :
 
     this->appSettings = appSettings;
 
+    resize((int)(755 * appSettings->screenRatio), (int)(455 * appSettings->screenRatio));
     setGeometry(QStyle::alignedRect(Qt::RightToLeft, Qt::AlignCenter, size(), QGuiApplication::primaryScreen()->availableGeometry()));
     setWindowTitle("تنظیمات");
     setWindowIcon(QIcon(":/files/images/ghazal-256x256.png"));
     setWindowModality(Qt::WindowModal);
-    ui->spinBoxHemistich->setMinimum(appSettings->hemistichDistanceMin);
-    ui->spinBoxHemistich->setMaximum(appSettings->hemistichDistanceMax);
 
     preCreator();
 
-    ui->lineEdit->setText(QDir::toNativeSeparators(appSettings->mainDBPath));
-    ui->darkModeCheckBox->setChecked(appSettings->isDarkMode);
+    newDataDir = dataDir();
+    newMainDBPath = appSettings->mainDBPath;
+
+    setLineEditPath(ui->lineEditDataDir, newDataDir, FileDirType::Dir);
+    setLineEditPath(ui->lineEditDatabase, newMainDBPath, FileDirType::File);
+    ui->spinBoxHemistich->setMinimum(appSettings->hemistichDistanceMin);
+    ui->spinBoxHemistich->setMaximum(appSettings->hemistichDistanceMax);
+    ui->checkBoxDarkMode->setChecked(appSettings->isDarkMode);
+    ui->checkBoxSaveHistoryOnExit->setChecked(appSettings->saveHistoryOnExit);
     ui->spinBoxHemistich->setValue(appSettings->hemistichDistance);
     ui->labelText->setText(appSettings->viewFN);
     ui->spinBoxText->setValue(appSettings->viewFS.toDouble());
@@ -56,6 +63,10 @@ SettingsForm::SettingsForm(AppSettings *appSettings, QWidget *parent) :
         ui->radioListSys->setChecked(true);
     if(appSettings->appFN != "Sahel")
         ui->radioGloSys->setChecked(true);
+
+    QString historyFilePath = dataDir() + "/" + Constants::HistoryFileName;
+    if(!QFileInfo(historyFilePath).isFile())
+        ui->labelDeleteHistory->hide();
 }
 
 SettingsForm::~SettingsForm()
@@ -63,9 +74,14 @@ SettingsForm::~SettingsForm()
     delete ui;
 }
 
+void SettingsForm::keyPressEvent(QKeyEvent *e)
+{
+    if(e->key() == Qt::Key_Escape)
+        on_btnClose_clicked();
+}
+
 void SettingsForm::preCreator()
 {
-    preMainDBPath = appSettings->mainDBPath;
     preIsDarkMode = appSettings->isDarkMode;
     preHemistichDistance = appSettings->hemistichDistance;
     preViewFN = appSettings->viewFN;
@@ -76,10 +92,20 @@ void SettingsForm::preCreator()
     preAppFS = appSettings->appFS;
 }
 
-void SettingsForm::keyPressEvent(QKeyEvent *e)
+void SettingsForm::setLineEditPath(QLineEdit *lineEdit, const QString &path, FileDirType fileDirType)
 {
-    if(e->key() == Qt::Key_Escape)
-        on_btnClose_clicked();
+    if(path.isEmpty())
+    {
+        lineEdit->clear();
+        return;
+    }
+
+    QString pathAbsRel(createRelativePathIfPossible(path, fileDirType));
+    if(QDir(pathAbsRel).isAbsolute())
+        lineEdit->setText(QDir::toNativeSeparators(pathAbsRel));
+    else
+        lineEdit->setText(QString("%1   ->   %2").arg(QDir::toNativeSeparators(pathAbsRel), QDir::toNativeSeparators(absolutePath(pathAbsRel))));
+    lineEdit->setCursorPosition(0);
 }
 
 void SettingsForm::on_btnClose_clicked()
@@ -125,8 +151,8 @@ void SettingsForm::on_btnGlo_clicked()
 
 void SettingsForm::on_btnApply_clicked()
 {
-    appSettings->mainDBPath = QDir::fromNativeSeparators(ui->lineEdit->text());
-    appSettings->isDarkMode = ui->darkModeCheckBox->isChecked();
+    appSettings->isDarkMode = ui->checkBoxDarkMode->isChecked();
+    appSettings->saveHistoryOnExit = ui->checkBoxSaveHistoryOnExit->isChecked();
     appSettings->hemistichDistance = ui->spinBoxHemistich->value();
     appSettings->appFN = ui->labelGlo->text();
     appSettings->appFS = ui->spinBoxGlo->text();
@@ -143,11 +169,20 @@ void SettingsForm::on_btnApply_clicked()
         applyChanges();
         emit sigTabTheme();
         emit sigTabFormSize();
-        emit sigAdjustMenuFont();
+        emit sigThemeAndMenuFont();
     }
 
-    if(appSettings->mainDBPath != preMainDBPath)
+    if(newDataDir != dataDir())
+    {
+        setDataDir(createRelativePathIfPossible(newDataDir, FileDirType::Dir));
+        emit sigWriteSettings();
+    }
+
+    if(newMainDBPath != appSettings->mainDBPath)
+    {
+        appSettings->mainDBPath = newMainDBPath;
         emit sigMainDBChanged();
+    }
 
     preCreator();
 }
@@ -169,7 +204,8 @@ void SettingsForm::on_btnOK_clicked()
 
 void SettingsForm::on_btnDefault_clicked()
 {
-    ui->darkModeCheckBox->setChecked(false);
+    ui->checkBoxDarkMode->setChecked(false);
+    ui->checkBoxSaveHistoryOnExit->setChecked(true);
     ui->spinBoxHemistich->setValue(60);
     ui->labelGlo->setText("Sahel");
     ui->spinBoxGlo->setValue(10.5);
@@ -178,19 +214,46 @@ void SettingsForm::on_btnDefault_clicked()
     ui->labelList->setText("Sahel");
     ui->spinBoxList->setValue(11);
 
+    newDataDir = dataDir();
+    newMainDBPath = appSettings->mainDBPath;
+
+    setLineEditPath(ui->lineEditDataDir, newDataDir, FileDirType::Dir);
+    setLineEditPath(ui->lineEditDatabase, newMainDBPath, FileDirType::File);
     on_btnApply_clicked();
 }
 
-void SettingsForm::on_btnBrowse_clicked()
+void SettingsForm::on_btnBrowseDataDir_clicked()
 {
-    QString filter = "Database files (*.s3db *.db *.sqlite3 *.sqlite *.gdb);;All files (*.*)";
-    QString file_name = QFileDialog::getOpenFileName(this, "Open", QDir::homePath(), filter);
+    QString dir_path = QFileDialog::getExistingDirectory(this, "Select Directory", dataDir(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if(!dir_path.isEmpty())
+    {
+        if(QFileInfo(dir_path).isWritable())
+        {
+            newDataDir = dir_path;
+            setLineEditPath(ui->lineEditDataDir, dir_path, FileDirType::Dir);
+        }
+        else
+        {
+            messageBox("خطا", "این مسیر قابل نوشتن نیست! لطفا مسیر دیگری انتخاب کنید.", Warning, this);
+        }
+    }
+}
+
+void SettingsForm::on_btnBrowseDatabase_clicked()
+{
+    QString filter = "Database files (*.s3db *.db *.sqlite3 *.sqlite *.gdb);;All files (*)";
+    QString file_name = QFileDialog::getOpenFileName(this, "Open", (appSettings->mainDBPath.isEmpty() ? QDir::homePath() : QFileInfo(appSettings->mainDBPath).path()), filter);
     if(!file_name.isEmpty())
     {
         if(isStdGanjoorDB(file_name))
-            ui->lineEdit->setText(QDir::toNativeSeparators(file_name));
+        {
+            newMainDBPath = file_name;
+            setLineEditPath(ui->lineEditDatabase, file_name, FileDirType::File);
+        }
         else
+        {
             messageBox("خطا", "<b>خطا</b>:<br />فایل انتخاب‌شده قالب استانداردی ندارد!", Critical, this);
+        }
     }
 }
 
@@ -207,4 +270,18 @@ void SettingsForm::on_radioListSahel_clicked()
 void SettingsForm::on_radioGloSahel_clicked()
 {
     ui->labelGlo->setText("Sahel");
+}
+
+void SettingsForm::on_labelDeleteHistory_linkActivated(const QString &link)
+{
+    Q_UNUSED(link);  // (void)link;
+
+    int reply = messageBox("حذف؟", "آیا از حذف فایل تاریخچه مطمئن هستید؟  ", WarningQuestion, this);
+    if(reply == QMessageBox::Yes)
+    {
+        QString historyFilePath = dataDir() + "/" + Constants::HistoryFileName;
+        QFile::remove(historyFilePath);
+        if(!QFileInfo(historyFilePath).isFile())
+            ui->labelDeleteHistory->hide();
+    }
 }

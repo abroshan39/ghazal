@@ -3,7 +3,6 @@
     Publisher: Rosybit
     Url: http://www.rosybit.com
     GitHub: https://github.com/abroshan39/ghazal
-    Version: 1.4
     Author: Aboutaleb Roshan [ab.roshan39@gmail.com]
     License: MIT License
 */
@@ -33,6 +32,7 @@ signals:
 
 public slots:
     void labelUpdate();
+    void singleCheckBoxClicked(bool checked);
     void lineEditsZWNJPressed(QObject *object, Qt::KeyboardModifier key);
     void searchRangeMenuCreator();
     void actionCat();
@@ -44,13 +44,16 @@ private slots:
     void on_listWidget_doubleClicked(const QModelIndex &index);
     void on_selectAllCheckBox_clicked(bool checked);
     void on_selectNoneCheckBox_clicked(bool checked);
-    void on_skipDiacriticsCheckBox_clicked(bool checked);
-    void on_skipCharTypesCheckBox_clicked(bool checked);
+    void on_checkBoxSkipDiacritics_clicked(bool checked);
+    void on_checkBoxSkipCharTypes_clicked(bool checked);
+    void on_checkBoxShowItems_clicked(bool checked);
     void on_btnOK_clicked();
     void on_btnClose_clicked();
     void on_btnSearch_clicked();
-    void on_checkBoxHash_toggled(bool checked);
     void on_btnExamples_clicked();
+    void on_checkBoxCounter_clicked(bool checked);
+    void on_checkBoxRadif_clicked(bool checked);
+    void on_checkBoxGhafie_clicked(bool checked);
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;
@@ -58,9 +61,13 @@ protected:
 private:
     Ui::SearchForm *ui;
     AppSettings *appSettings;
-    bool fromFormLoad = true;
+    bool allItemsSelected;
+    QStringList poetIDList;
+    SearchTable searchTable;
+    SearchMethod searchMethod;
     bool skipDiacritics;
     bool skipCharTypes;
+    bool showItemsDuringSearch;
     QString strSearch;
 
     QAction *catAction;

@@ -1,5 +1,5 @@
 # Ghazal: The library of persian poetry
-Ghazal is a library of persian poetry and a free and open-source software. Ghazal is written in C++ using the Qt framework. This software uses [Ganjoor](https://ganjoor.net) database. This branch here contains pre-built files for Windows and Linux ([AppImage](https://appimage.org)). Simply download the AppImage and run it on all linux distributions.
+Ghazal is a library of persian poetry and a free and open-source software. Ghazal is written in C++ using the Qt framework. This software uses [Ganjoor](https://ganjoor.net) database. This branch here contains pre-built binaries for Linux, macOS and Windows.
 
 ![linux-01](app-screenshots/linux-01.png)
 
@@ -7,8 +7,19 @@ Ghazal is a library of persian poetry and a free and open-source software. Ghaza
 
 ![windows-01-abjad](app-screenshots/windows-01-abjad.gif)
 
+## Software Requirements
+- Qt 5 (The minimum version should be Qt 5.7) or Qt 6 (+core5compat)
+- Supported compiler
+  - Linux: The GNU Compiler Collection (GCC) 4.9.2 or later
+  - macOS: Clang 4.0.0 or later
+  - Windows: MinGW[64] compiler gcc 5.3 or later, or Microsoft Visual C++ (MSVC) compiler 2013 or later
+- make
+- zlib
+- QuaZip
+- [CMake]
+
 ## Building
-Linux (cmake):
+Linux and macOS (cmake):
 ```
 cd ghazal-src-dir
 cmake . -Bbuild
@@ -16,7 +27,7 @@ cd build
 make
 ```
 
-Linux (qmake):
+Linux and macOS (qmake):
 ```
 cd ghazal-src-dir
 qmake ghazal.pro

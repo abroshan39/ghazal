@@ -3,7 +3,6 @@
     Publisher: Rosybit
     Url: http://www.rosybit.com
     GitHub: https://github.com/abroshan39/ghazal
-    Version: 1.4
     Author: Aboutaleb Roshan [ab.roshan39@gmail.com]
     License: MIT License
 */
@@ -28,13 +27,15 @@ AboutAuthorForm::AboutAuthorForm(AppSettings *appSettings, QWidget *parent) :
 
     this->appSettings = appSettings;
 
-    QString backgroundColor = appSettings->isDarkMode ? "background-color:rgb(35,35,35);" : "background-color:rgb(255,255,255);";
-    QString hafez = appSettings->isDarkMode ? "image:url(:/files/images/hafez-white.svg);" : "image:url(:/files/images/hafez.svg);";
-    resize(1000, 580);
+    resize((int)(1000 * appSettings->screenRatio), (int)(580 * appSettings->screenRatio));
     setGeometry(QStyle::alignedRect(Qt::RightToLeft, Qt::AlignCenter, size(), QGuiApplication::primaryScreen()->availableGeometry()));
     setWindowTitle("درباره نویسنده");
     setWindowIcon(QIcon(":/files/images/ghazal-256x256.png"));
     setWindowModality(Qt::WindowModal);
+
+    QString backgroundColor = appSettings->isDarkMode ? "background-color:rgb(35,35,35);" : "background-color:rgb(255,255,255);";
+    QString hafez = appSettings->isDarkMode ? "image:url(:/files/images/hafez-white.svg);" : "image:url(:/files/images/hafez.svg);";
+
     setStyleSheet(backgroundColor);
     ui->label->setStyleSheet(hafez);
     ui->label->setFixedSize(ui->label->maximumWidth(), size().height() / 3);
@@ -69,10 +70,11 @@ void AboutAuthorForm::setHtml()
     html = file.readAll();
     file.close();
 
-    html.replace(QRegularExpression("\\$\\{FontName\\}"), appSettings->viewFN);
-    html.replace(QRegularExpression("\\$\\{FontSize\\}"), QString::number(appSettings->viewFS.toDouble()));
-    html.replace(QRegularExpression("\\$\\{TextColor\\}"), textColor);
-    html.replace(QRegularExpression("\\$\\{AppNameFa\\}"), Constants::AppNameFa);
+    html.replace("${FontName}", appSettings->viewFN);
+    html.replace("${FontSize}", QString::number(appSettings->viewFS.toDouble()));
+    html.replace("${TextColor}", textColor);
+    html.replace("${GhazalFa}", Constants::GhazalFa);
+    html.replace("${ProgrammerFa}", Constants::ProgrammerFa);
 
     ui->textBrowser->setHtml(html);
 }

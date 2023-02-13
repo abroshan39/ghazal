@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.5)
 
 set(PROJECT_NAME "Ghazal")
-project(${PROJECT_NAME} VERSION 1.4 LANGUAGES C CXX)
+project(${PROJECT_NAME} LANGUAGES C CXX)
 
-if(UNIX)
+if(UNIX AND NOT APPLE)
     set(OUTPUT_FILE_NAME "ghazal")
 else()
     set(OUTPUT_FILE_NAME "Ghazal")
@@ -37,22 +37,28 @@ endif()
 
 if(QT_VERSION_MAJOR EQUAL 5)
     find_package(Qt5 REQUIRED COMPONENTS Core Gui Widgets Sql Concurrent Xml Network)
-    if(UNIX)
+    if(UNIX AND NOT APPLE)
         set(QUAZIP_LIB "${CMAKE_CURRENT_SOURCE_DIR}/libraries/unix/quazip/libquazip1-qt5.so")
         set(ZLIB "${CMAKE_CURRENT_SOURCE_DIR}/libraries/unix/quazip/libz.so")
     elseif(WIN32)
         set(QUAZIP_LIB "${CMAKE_CURRENT_SOURCE_DIR}/libraries/win/quazip/libquazip1-qt5.dll")
         set(ZLIB "${CMAKE_CURRENT_SOURCE_DIR}/libraries/win/quazip/zlib1.dll")
+    elseif(APPLE)
+        set(QUAZIP_LIB "${CMAKE_CURRENT_SOURCE_DIR}/libraries/mac/quazip/libquazip1-qt5.dylib")
+        set(ZLIB "${CMAKE_CURRENT_SOURCE_DIR}/libraries/mac/quazip/libz.dylib")
     endif()
     set(GHAZAL_LIBRARIES Qt5::Core Qt5::Gui Qt5::Widgets Qt5::Sql Qt5::Concurrent Qt5::Xml Qt5::Network ${QUAZIP_LIB})
 elseif(QT_VERSION_MAJOR EQUAL 6)
     find_package(Qt6 REQUIRED COMPONENTS Core Core5Compat Gui Widgets Sql Concurrent Xml Network)
-    if(UNIX)
+    if(UNIX AND NOT APPLE)
         set(QUAZIP_LIB "${CMAKE_CURRENT_SOURCE_DIR}/libraries/unix/quazip/libquazip1-qt6.so")
         set(ZLIB "${CMAKE_CURRENT_SOURCE_DIR}/libraries/unix/quazip/libz.so")
     elseif(WIN32)
         set(QUAZIP_LIB "${CMAKE_CURRENT_SOURCE_DIR}/libraries/win/quazip/libquazip1-qt6.dll")
         set(ZLIB "${CMAKE_CURRENT_SOURCE_DIR}/libraries/win/quazip/zlib1.dll")
+    elseif(APPLE)
+        set(QUAZIP_LIB "${CMAKE_CURRENT_SOURCE_DIR}/libraries/mac/quazip/libquazip1-qt6.dylib")
+        set(ZLIB "${CMAKE_CURRENT_SOURCE_DIR}/libraries/mac/quazip/libz.dylib")
     endif()
     set(GHAZAL_LIBRARIES Qt6::Core Qt6::Core5Compat Qt6::Gui Qt6::Widgets Qt6::Sql Qt6::Concurrent Qt6::Xml Qt6::Network ${QUAZIP_LIB})
 endif()
@@ -75,6 +81,8 @@ set(HEADERS
     src/searchform.h
     src/settingsform.h
     src/tabform.h
+    src/updatecheckform.h
+    src/version.h
     src/wordsearchform.h
     src/worker.h
 )
@@ -103,6 +111,7 @@ set(SOURCES
     src/settingsform.cpp
     src/tabform.cpp
     src/tabform_context_menu.cpp
+    src/updatecheckform.cpp
     src/wordsearchform.cpp
     src/worker.cpp
 )
@@ -119,6 +128,7 @@ set(FORMS
     src/searchform.ui
     src/settingsform.ui
     src/tabform.ui
+    src/updatecheckform.ui
     src/wordsearchform.ui
 )
 
@@ -127,8 +137,6 @@ set(RESOURCES
     resources/resource.qrc
 )
 
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/libraries/include")
-
 if(WIN32 AND CMAKE_BUILD_TYPE STREQUAL "Release")
     enable_language(RC)
     set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/resources/resource_win.rc")
@@ -136,6 +144,9 @@ if(WIN32 AND CMAKE_BUILD_TYPE STREQUAL "Release")
 else()
     add_executable(${PROJECT_NAME} ${HEADERS} ${SOURCES} ${FORMS} ${RESOURCES})
 endif()
+
+#include_directories("${CMAKE_CURRENT_SOURCE_DIR}/libraries/include")
+target_include_directories(${PROJECT_NAME} PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/libraries/include")
 
 target_link_libraries(${PROJECT_NAME} ${GHAZAL_LIBRARIES})
 

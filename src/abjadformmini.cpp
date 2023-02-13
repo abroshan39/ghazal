@@ -3,7 +3,6 @@
     Publisher: Rosybit
     Url: http://www.rosybit.com
     GitHub: https://github.com/abroshan39/ghazal
-    Version: 1.4
     Author: Aboutaleb Roshan [ab.roshan39@gmail.com]
     License: MIT License
 */
@@ -28,6 +27,7 @@ AbjadFormMini::AbjadFormMini(AppSettings *appSettings, QWidget *parent) :
     this->appSettings = appSettings;
 
     appSettings->isOpenAbjadFormMini = true;
+    resize((int)(310 * appSettings->screenRatio), (int)(160 * appSettings->screenRatio));
     setGeometry(QStyle::alignedRect(Qt::RightToLeft, Qt::AlignCenter, size(), QGuiApplication::primaryScreen()->availableGeometry()));
     setWindowTitle("حساب ابجد");
     setWindowIcon(QIcon(":/files/images/ghazal-256x256.png"));
@@ -43,13 +43,13 @@ AbjadFormMini::~AbjadFormMini()
 
 void AbjadFormMini::keyPressEvent(QKeyEvent *e)
 {
-    if(e->key() == Qt::Key_Return)
+    if(e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter)
         close();
 }
 
-void AbjadFormMini::closeEvent(QCloseEvent *event)
+void AbjadFormMini::closeEvent(QCloseEvent *e)
 {
-    Q_UNUSED(event);  // (void)event;
+    Q_UNUSED(e);  // (void)e;
     appSettings->isOpenAbjadFormMini = false;
 }
 

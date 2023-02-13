@@ -3,7 +3,6 @@
     Publisher: Rosybit
     Url: http://www.rosybit.com
     GitHub: https://github.com/abroshan39/ghazal
-    Version: 1.4
     Author: Aboutaleb Roshan [ab.roshan39@gmail.com]
     License: MIT License
 */
@@ -16,6 +15,7 @@
 #include <QAction>
 #include <QClipboard>
 #include "common_functions.h"
+#include "event_functions.h"
 #include "worker.h"
 
 QT_BEGIN_NAMESPACE
@@ -31,7 +31,7 @@ public:
     ~MainWindow();
 
 signals:
-    void sigSetTabContent(const QString &levelID, bool setFocusListWidget = false, bool rememberScrollBarValue = false, const QStringList &highlightText = QStringList(), const QString &bookmarkVerseID = QString());
+    void sigSetTabContent(const QString &levelID, bool setFocusListWidget, bool rememberScrollBarValue, const QStringList &highlightText, const QString &vorder, bool highlightVorder, bool highlightWithUnderline);
     void sigTabFormSize();
     void sigTabTheme();
     void sigTabHeaderLabel();
@@ -44,17 +44,18 @@ public slots:
     void slotUpdatePoetList();
     void slotMainDBChanged();
     void slotTabLastLevelIDChanged();
-    void slotAdjustMenuFont();
+    void slotThemeAndMenuFont();
     void slotSelectedText(const QString &text);
     void slotSearchTableChanged();
     void slotSearch();
+    void setTableViewModel(QStandardItemModel *model);
     void poetSelected(const QModelIndex &index, bool setFocusListWidget = false);
     void themeChanged();
     void fontSizeChanged(QWidget *ptrTab);
     void tabHeaderLabel();
     void checkBookmark();
     void slotBookmarkChanged();
-    void setContents(QWidget *ptrTab, const QString &levelID, bool setFocusListWidget = false, bool rememberScrollBarValue = false, const QStringList &highlightText = QStringList(), const QString &bookmarkVerseID = QString());
+    void setContents(QWidget *ptrTab, const QString &levelID, bool setFocusListWidget = false, bool rememberScrollBarValue = false, const QStringList &highlightText = QStringList(), const QString &vorder = QString(), bool highlightVorder = false, bool highlightWithUnderline = true);
     void threadFinished(Worker::WorkerType type, QVariant result);
     void createHistorySearch();
     void loadDefaultFonts();
@@ -62,20 +63,22 @@ public slots:
     void readSettings();
     void writeHistory();
     void readHistory();
-    void widgetsStartup();
+    void startup();
     void applyStyleSheet();
     void checkDBExist();
     void applyStyleSheetListHeader();
     void lineEditsZWNJPressed(QObject *object, Qt::KeyboardModifier key);
+    void lineEditsFocusChanged(QObject *object, QEvent *event);
     void listWidgetKeyPressed(QObject *object, QKeyEvent *event);
-    void tableWidgetKeyPressed(QObject *object, QKeyEvent *event);
+    void tableViewKeyPressed(QObject *object, QKeyEvent *event);
     void lineEditSearchKeyPressed(QObject *object, QKeyEvent *event);
     void appMenuCreator();
     void searchRangeMenuCreator();
-    void tableWidgetBookmark();
+    void tableBookmark();
     void actionNewTab();
     void actionCloseTab();
     void actionOpen();
+    void actionSave();
     void actionExit();
     void actionPrevious();
     void actionNext();
@@ -87,6 +90,7 @@ public slots:
     void actionZoomOut();
     void actionDefaultZoomLevel();
     void actionRefresh();
+    void actionRefreshPos();
     void actionBookmarkToggled(bool checked);
     void actionBookmarkToggledList(bool checked);
     void actionShowBookmarks(bool checked);
@@ -96,6 +100,7 @@ public slots:
     void actionDownloadDB();
     void actionAbjad();
     void actionSettings();
+    void actionUpdateCheck();
     void actionAboutAuthor();
     void actionAbout();
     void actionCat();
@@ -105,7 +110,7 @@ public slots:
 private slots:
     void on_listWidget_doubleClicked(const QModelIndex &index);
     void on_lineEditPoet_textChanged(const QString &arg1);
-    void on_tableWidget_doubleClicked(const QModelIndex &index);
+    void on_tableView_doubleClicked(const QModelIndex &index);
     void on_tabWidget_currentChanged(int index);
     void on_tabWidget_tabCloseRequested(int index);
     void on_splitter_2_splitterMoved(int pos, int index);
@@ -116,19 +121,26 @@ private slots:
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;
-    void closeEvent(QCloseEvent *event) override;
+    void closeEvent(QCloseEvent *e) override;
+    void dragEnterEvent(QDragEnterEvent *e) override;
+    void dropEvent(QDropEvent *e) override;
 
 private:
     Ui::MainWindow *ui;
     AppSettings appSettings;
+    InSearchSettings inSearchSettings;
     SearchHistory searchHistory;
     QClipboard *clipboard;
+    QStandardItemModel *modelSearch;
     bool isClipboardConnect;
-    bool fromClickOnTableWidget = false;
+    bool fromClickOnTable = false;
 
     QMap<QWidget *, QString> historyOnLoad;
     QMap<QWidget *, QString> tabFontSize;
     QMap<QWidget *, bool> tabIsDarkMode;
+
+    ZWNJPress *zwnjPoet;
+    ZWNJPress *zwnjSearch;
 
     QMenu *fileMenu;
     QMenu *navigationMenu;

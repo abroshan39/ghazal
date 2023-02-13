@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>672</width>
-    <height>399</height>
+    <height>400</height>
    </rect>
   </property>
   <property name="font">
@@ -33,6 +33,9 @@
         </property>
         <property name="title">
          <string>  مدیریت پایگاه داده  </string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_4">
          <item>

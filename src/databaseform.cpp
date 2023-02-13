@@ -3,7 +3,6 @@
     Publisher: Rosybit
     Url: http://www.rosybit.com
     GitHub: https://github.com/abroshan39/ghazal
-    Version: 1.4
     Author: Aboutaleb Roshan [ab.roshan39@gmail.com]
     License: MIT License
 */
@@ -30,12 +29,14 @@ DatabaseForm::DatabaseForm(AppSettings *appSettings, QWidget *parent) :
 
     this->appSettings = appSettings;
 
+    resize((int)(672 * appSettings->screenRatio), (int)(400 * appSettings->screenRatio));
     setGeometry(QStyle::alignedRect(Qt::RightToLeft, Qt::AlignCenter, size(), QGuiApplication::primaryScreen()->availableGeometry()));
     setWindowTitle("مدیریت پایگاه داده");
     setWindowIcon(QIcon(":/files/images/ghazal-256x256.png"));
     setWindowModality(Qt::WindowModal);
 
     ui->lineEdit->setText(QDir::toNativeSeparators(appSettings->mainDBPath));
+    ui->lineEdit->setCursorPosition(0);
     ui->labelProgress->hide();
     ui->progressBar->hide();
     ui->progressBar->setMaximum(0);
@@ -55,16 +56,16 @@ void DatabaseForm::keyPressEvent(QKeyEvent *e)
         on_btnClose_clicked();
 }
 
-void DatabaseForm::closeEvent(QCloseEvent *event)
+void DatabaseForm::closeEvent(QCloseEvent *e)
 {
     if(isProcessing)
     {
         messageBox("توجه", "نرم‌افزار در حال پردازش است. لطفا شکیبا باشید!", Warning, this);
-        event->ignore();
+        e->ignore();
         return;
     }
 
-    QWidget::closeEvent(event);
+    QWidget::closeEvent(e);
 }
 
 void DatabaseForm::on_btnClose_clicked()
@@ -173,24 +174,22 @@ void DatabaseForm::on_btnAddPoet_clicked()
             return;
     }
 
-    QString filter = "Supported files (*.gdb *.s3db *.db *.sqlite *.sqlite3 *.zip);;Database files (*.gdb *.s3db *.db *.sqlite *.sqlite3);;Compressed files (*.zip);;All files (*.*)";
-    QString file_name = QFileDialog::getOpenFileName(this, "Open", QDir::homePath(), filter);
+    QString filter = "Supported files (*.gdb *.s3db *.db *.sqlite *.sqlite3 *.zip);;Database files (*.gdb *.s3db *.db *.sqlite *.sqlite3);;Compressed files (*.zip);;All files (*)";
+    QStringList file_names = QFileDialog::getOpenFileNames(this, "Open", QDir::homePath(), filter);
 
-    if(!file_name.isEmpty())
+    if(!file_names.isEmpty())
     {
-        if(isStdGanjoorDB(file_name) || file_name.endsWith(".zip", Qt::CaseInsensitive))
+        for(int i = 0; i < file_names.count(); i++)
         {
-            Worker::WorkerType workerType;
-            if(file_name.endsWith(".zip", Qt::CaseInsensitive))
-                workerType = Worker::ImporterZip;
-            else
-                workerType = Worker::Importer;
-
-            Worker *worker = new Worker(workerType, appSettings, file_name, true, 1000);
-            threadStart(worker);
+            if(!file_names[i].endsWith(".zip", Qt::CaseInsensitive) && !isStdGanjoorDB(file_names[i]))
+            {
+                messageBox("خطا", QString("<b>خطا</b>:<br />فایل انتخاب‌شده قالب استانداردی ندارد!<br />[%1]").arg(QDir::toNativeSeparators(file_names[i])), Critical, this);
+                return;
+            }
         }
-        else
-            messageBox("خطا", "<b>خطا</b>:<br />فایل انتخاب‌شده قالب استانداردی ندارد!", Critical, this);
+
+        Worker *worker = new Worker(Worker::Importer, appSettings, file_names, true, 1000);
+        threadStart(worker);
     }
 }
 
@@ -255,11 +254,6 @@ void DatabaseForm::threadFinished(Worker::WorkerType type, QVariant result)
     if(type == Worker::Importer)
     {
         qDebug().noquote() << "Worker: Importer";
-        slotUpdatePoetList();
-    }
-    else if(type == Worker::ImporterZip)
-    {
-        qDebug().noquote() << "Worker: ImporterZip";
         slotUpdatePoetList();
     }
     else if(type == Worker::Exporter)

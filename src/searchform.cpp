@@ -3,7 +3,6 @@
     Publisher: Rosybit
     Url: http://www.rosybit.com
     GitHub: https://github.com/abroshan39/ghazal
-    Version: 1.4
     Author: Aboutaleb Roshan [ab.roshan39@gmail.com]
     License: MIT License
 */
@@ -30,40 +29,59 @@ SearchForm::SearchForm(AppSettings *appSettings, QWidget *parent) :
 
     this->appSettings = appSettings;
 
+    resize((int)(596 * appSettings->screenRatio), (int)(596 * appSettings->screenRatio));
     setGeometry(QStyle::alignedRect(Qt::RightToLeft, Qt::AlignCenter, size(), QGuiApplication::primaryScreen()->availableGeometry()));
     setWindowTitle("جست‌وجوی پیشرفته");
     setWindowIcon(QIcon(":/files/images/ghazal-256x256.png"));
     setWindowModality(Qt::WindowModal);
 
+    allItemsSelected = appSettings->searchSettings.allItemsSelected;
+    poetIDList = appSettings->searchSettings.poetIDList;
+    searchTable = appSettings->searchSettings.table;
+    searchMethod = appSettings->searchSettings.method;
+    skipDiacritics = appSettings->searchSettings.skipDiacritics;
+    skipCharTypes = appSettings->searchSettings.skipCharTypes;
+    showItemsDuringSearch = appSettings->searchSettings.showItemsDuringSearch;
+
     searchRangeMenuCreator();
     listWidgetPoetList(ui->listWidget, appSettings->mainDB, true);
     ui->labelTotal->setText(QString("تعداد کل: %1 مورد   ").arg(ui->listWidget->count()));
 
-    for(int i = 0; i < ui->listWidget->count(); i++)
-        if(appSettings->ss.poetID.contains(ui->listWidget->item(i)->data(Qt::UserRole).toString()))
-            ui->listWidget->item(i)->setCheckState(Qt::Checked);
-    fromFormLoad = false;
-    labelUpdate();
+    if(allItemsSelected)
+    {
+        poetIDList.clear();
+    }
+    else
+    {
+        for(int i = 0; i < ui->listWidget->count(); i++)
+            if(poetIDList.contains(ui->listWidget->item(i)->data(Qt::UserRole).toString()))
+                ui->listWidget->item(i)->setCheckState(Qt::Checked);
+    }
 
-    skipDiacritics = appSettings->ss.skipDiacritics;
-    skipCharTypes = appSettings->ss.skipCharTypes;
-    ui->skipDiacriticsCheckBox->setChecked(skipDiacritics);
-    ui->skipCharTypesCheckBox->setChecked(skipCharTypes);
+    ui->radioMethod1->setChecked(searchMethod == SearchMethod::Method1);
+    ui->radioMethod2->setChecked(searchMethod == SearchMethod::Method2);
+    ui->checkBoxSkipDiacritics->setChecked(skipDiacritics);
+    ui->checkBoxSkipCharTypes->setChecked(skipCharTypes);
+    ui->checkBoxShowItems->setChecked(showItemsDuringSearch);
 
     lineEditDirectionCorrector(ui->lineEditOr);
     lineEditDirectionCorrector(ui->lineEditNeg);
-    lineEditDirectionCorrector(ui->lineEditHash);
+    lineEditDirectionCorrector(ui->lineEditSingle);
     lineEditDirectionCorrector(ui->lineEditPlus);
     lineEditDirectionCorrector(ui->lineEditExact);
     lineEditDirectionCorrector(ui->lineEditOrder);
-    ui->lineEditHash->setEnabled(false);
+    lineEditDirectionCorrector(ui->lineEditStart);
+    lineEditDirectionCorrector(ui->lineEditEnd);
+    ui->lineEditSingle->setEnabled(false);
 
     connect(new ZWNJPress(ui->lineEditOr), &ZWNJPress::zwnjPressed, this, &SearchForm::lineEditsZWNJPressed);
     connect(new ZWNJPress(ui->lineEditNeg), &ZWNJPress::zwnjPressed, this, &SearchForm::lineEditsZWNJPressed);
-    connect(new ZWNJPress(ui->lineEditHash), &ZWNJPress::zwnjPressed, this, &SearchForm::lineEditsZWNJPressed);
+    connect(new ZWNJPress(ui->lineEditSingle), &ZWNJPress::zwnjPressed, this, &SearchForm::lineEditsZWNJPressed);
     connect(new ZWNJPress(ui->lineEditPlus), &ZWNJPress::zwnjPressed, this, &SearchForm::lineEditsZWNJPressed);
     connect(new ZWNJPress(ui->lineEditExact), &ZWNJPress::zwnjPressed, this, &SearchForm::lineEditsZWNJPressed);
     connect(new ZWNJPress(ui->lineEditOrder), &ZWNJPress::zwnjPressed, this, &SearchForm::lineEditsZWNJPressed);
+    connect(new ZWNJPress(ui->lineEditStart), &ZWNJPress::zwnjPressed, this, &SearchForm::lineEditsZWNJPressed);
+    connect(new ZWNJPress(ui->lineEditEnd), &ZWNJPress::zwnjPressed, this, &SearchForm::lineEditsZWNJPressed);
 }
 
 SearchForm::~SearchForm()
@@ -82,11 +100,6 @@ void SearchForm::keyPressEvent(QKeyEvent *e)
 void SearchForm::on_btnClose_clicked()
 {
     close();
-    if(!strSearch.isEmpty())
-    {
-        appSettings->ss.searchPhrase = strSearch;
-        emit sigSearch();
-    }
 }
 
 void SearchForm::on_listWidget_doubleClicked(const QModelIndex &index)
@@ -101,18 +114,23 @@ void SearchForm::on_listWidget_doubleClicked(const QModelIndex &index)
 
 void SearchForm::on_listWidget_itemChanged(QListWidgetItem *item)
 {
-    if(!fromFormLoad)
+    QString poetID(item->data(Qt::UserRole).toString());
+
+    ui->selectAllCheckBox->setChecked(false);
+    ui->selectNoneCheckBox->setChecked(false);
+
+    if(item->checkState() == Qt::Checked)
     {
-        ui->selectAllCheckBox->setChecked(false);
-        ui->selectNoneCheckBox->setChecked(false);
-
-        if(item->checkState() == Qt::Checked)
-            appSettings->ss.poetID << item->data(Qt::UserRole).toString();
-        else
-            appSettings->ss.poetID.removeOne(item->data(Qt::UserRole).toString());
-
-        labelUpdate();
+        if(!poetIDList.contains(poetID))
+            poetIDList << poetID;
     }
+    else
+    {
+        if(poetIDList.contains(poetID))
+            poetIDList.removeOne(poetID);
+    }
+
+    labelUpdate();
 }
 
 void SearchForm::on_selectAllCheckBox_clicked(bool checked)
@@ -143,8 +161,8 @@ void SearchForm::on_selectNoneCheckBox_clicked(bool checked)
 
 void SearchForm::labelUpdate()
 {
-    ui->labelSelectedCount->setText(QString("انتخاب‌شده: %1 مورد   ").arg(appSettings->ss.poetID.count()));
-    if(!appSettings->ss.poetID.count())
+    ui->labelSelectedCount->setText(QString("انتخاب‌شده: %1 مورد   ").arg(poetIDList.count()));
+    if(!poetIDList.count())
         ui->labelSelectedCount->setText("انتخاب‌شده:   ");
 }
 
@@ -154,32 +172,47 @@ void SearchForm::lineEditsZWNJPressed(QObject *object, Qt::KeyboardModifier key)
     static_cast<QLineEdit *>(object)->insert(Constants::ZWNJ);
 }
 
-void SearchForm::on_skipDiacriticsCheckBox_clicked(bool checked)
+void SearchForm::on_checkBoxSkipDiacritics_clicked(bool checked)
 {
     skipDiacritics = checked;
 }
 
-void SearchForm::on_skipCharTypesCheckBox_clicked(bool checked)
+void SearchForm::on_checkBoxSkipCharTypes_clicked(bool checked)
 {
     skipCharTypes = checked;
+}
+
+void SearchForm::on_checkBoxShowItems_clicked(bool checked)
+{
+    showItemsDuringSearch = checked;
 }
 
 void SearchForm::on_btnSearch_clicked()
 {
     QString str;
+    QString marker;
 
-    if(ui->checkBoxHash->isChecked())
+    if(ui->checkBoxCounter->isChecked())
+        marker = Constants::MARKER_COUNTER;
+    else if(ui->checkBoxRadif->isChecked())
+        marker = Constants::MARKER_RADIF;
+    else if(ui->checkBoxGhafie->isChecked())
+        marker = Constants::MARKER_GHAFIE;
+
+    if(!marker.isEmpty())
     {
-        str = ui->lineEditHash->text().trimmed().isEmpty() ? "" : "#" + ui->lineEditHash->text().trimmed();
+        str = ui->lineEditSingle->text().trimmed().isEmpty() ? "" : marker + ui->lineEditSingle->text().trimmed();
     }
     else
     {
         QString strOr;
         strOr = ui->lineEditOr->text().split(QRegularExpression("[\\s\\|]"), SKIP_EMPTY_PARTS).join(" | ");
-        str = ui->lineEditPlus->text().split(QRegularExpression("[\\s\\+]"), SKIP_EMPTY_PARTS).join(" + ");
+        str = ui->lineEditStart->text().trimmed().isEmpty() ? "" : "^" + ui->lineEditStart->text().trimmed();
+        str += (str.trimmed().isEmpty() || ui->lineEditPlus->text().trimmed().isEmpty() ? "" : " + ") + ui->lineEditPlus->text().split(QRegularExpression("[\\s\\+]"), SKIP_EMPTY_PARTS).join(" + ");
         str += (str.trimmed().isEmpty() || ui->lineEditExact->text().trimmed().isEmpty() ? "" : " + ") + (ui->lineEditExact->text().trimmed().isEmpty() ? "" : QString("\"%1\"").arg(ui->lineEditExact->text()));
         str += (str.trimmed().isEmpty() || ui->lineEditOrder->text().trimmed().isEmpty() ? "" : " + ") + ui->lineEditOrder->text().split(QRegularExpression("[\\s]|\\+\\+"), SKIP_EMPTY_PARTS).join(" ++ ");
-        str += str.trimmed().isEmpty() || ui->lineEditNeg->text().isEmpty() ? "" : " - " + ui->lineEditNeg->text().split(QRegularExpression("[\\s\\-]"), SKIP_EMPTY_PARTS).join(" - ");
+        str += (str.trimmed().isEmpty() || ui->lineEditNeg->text().isEmpty() ? "" : " - " + ui->lineEditNeg->text().split(QRegularExpression("[\\s\\-]"), SKIP_EMPTY_PARTS).join(" - "));
+        str += (str.trimmed().isEmpty() || ui->lineEditEnd->text().trimmed().isEmpty() ? "" : " + ") + (ui->lineEditEnd->text().trimmed().isEmpty() ? "" : "$" + ui->lineEditEnd->text().trimmed());
         str = (strOr.trimmed().isEmpty() ? "" : strOr) + (str.trimmed().isEmpty() || strOr.trimmed().isEmpty() ? "" : " | ") + str;
     }
 
@@ -189,39 +222,40 @@ void SearchForm::on_btnSearch_clicked()
 
 void SearchForm::on_btnOK_clicked()
 {
-    int poetCount = appSettings->ss.poetID.count();
+    int poetCount = poetIDList.count();
     if(poetCount == 0 || poetCount == ui->listWidget->count())
-        appSettings->ss.allItemsSelected = true;
+        allItemsSelected = true;
     else
-        appSettings->ss.allItemsSelected = false;
+        allItemsSelected = false;
 
-    if(appSettings->ss.allItemsSelected)
-        appSettings->ss.poetID.clear();
+    if(allItemsSelected)
+        poetIDList.clear();
+    else
+        std::sort(poetIDList.begin(), poetIDList.end(), idComp);
 
-    appSettings->ss.skipDiacritics = skipDiacritics;
-    appSettings->ss.skipCharTypes = skipCharTypes;
-    on_btnClose_clicked();
-}
+    if(ui->radioMethod1->isChecked())
+        searchMethod = SearchMethod::Method1;
+    else if(ui->radioMethod2->isChecked())
+        searchMethod = SearchMethod::Method2;
 
-void SearchForm::on_checkBoxHash_toggled(bool checked)
-{
-    if(checked)
+    appSettings->searchSettings.allItemsSelected = allItemsSelected;
+    appSettings->searchSettings.poetIDList = poetIDList;
+    appSettings->searchSettings.method = searchMethod;
+    appSettings->searchSettings.skipDiacritics = skipDiacritics;
+    appSettings->searchSettings.skipCharTypes = skipCharTypes;
+    appSettings->searchSettings.showItemsDuringSearch = showItemsDuringSearch;
+
+    if(searchTable != appSettings->searchSettings.table)
     {
-        ui->lineEditHash->setEnabled(true);
-        ui->lineEditOr->setEnabled(false);
-        ui->lineEditNeg->setEnabled(false);
-        ui->lineEditPlus->setEnabled(false);
-        ui->lineEditExact->setEnabled(false);
-        ui->lineEditOrder->setEnabled(false);
+        appSettings->searchSettings.table = searchTable;
+        emit sigSearchTableChanged();
     }
-    else
+
+    on_btnClose_clicked();
+    if(!strSearch.isEmpty())
     {
-        ui->lineEditHash->setEnabled(false);
-        ui->lineEditOr->setEnabled(true);
-        ui->lineEditNeg->setEnabled(true);
-        ui->lineEditPlus->setEnabled(true);
-        ui->lineEditExact->setEnabled(true);
-        ui->lineEditOrder->setEnabled(true);
+        appSettings->searchSettings.searchPhrase = strSearch;
+        emit sigSearch();
     }
 }
 
@@ -252,37 +286,81 @@ void SearchForm::searchRangeMenuCreator()
     connect(poemAction, &QAction::triggered, this, &SearchForm::actionPoem);
     connect(verseAction, &QAction::triggered, this, &SearchForm::actionVerse);
 
-    if(appSettings->ss.table == CatTable)
+    if(searchTable == CatTable)
         actionCat();
-    else if(appSettings->ss.table == PoemTable)
+    else if(searchTable == PoemTable)
         actionPoem();
-    else if(appSettings->ss.table == VerseTable)
+    else if(searchTable == VerseTable)
         actionVerse();
 }
 
 void SearchForm::actionCat()
 {
-    appSettings->ss.table = CatTable;
+    searchTable = CatTable;
     catAction->setChecked(true);
     poemAction->setChecked(false);
     verseAction->setChecked(false);
-    emit sigSearchTableChanged();
 }
 
 void SearchForm::actionPoem()
 {
-    appSettings->ss.table = PoemTable;
+    searchTable = PoemTable;
     catAction->setChecked(false);
     poemAction->setChecked(true);
     verseAction->setChecked(false);
-    emit sigSearchTableChanged();
 }
 
 void SearchForm::actionVerse()
 {
-    appSettings->ss.table = VerseTable;
+    searchTable = VerseTable;
     catAction->setChecked(false);
     poemAction->setChecked(false);
     verseAction->setChecked(true);
-    emit sigSearchTableChanged();
+}
+
+void SearchForm::singleCheckBoxClicked(bool checked)
+{
+    if(checked)
+    {
+        ui->lineEditSingle->setEnabled(true);
+        ui->lineEditOr->setEnabled(false);
+        ui->lineEditNeg->setEnabled(false);
+        ui->lineEditPlus->setEnabled(false);
+        ui->lineEditExact->setEnabled(false);
+        ui->lineEditOrder->setEnabled(false);
+        ui->lineEditStart->setEnabled(false);
+        ui->lineEditEnd->setEnabled(false);
+    }
+    else
+    {
+        ui->lineEditSingle->setEnabled(false);
+        ui->lineEditOr->setEnabled(true);
+        ui->lineEditNeg->setEnabled(true);
+        ui->lineEditPlus->setEnabled(true);
+        ui->lineEditExact->setEnabled(true);
+        ui->lineEditOrder->setEnabled(true);
+        ui->lineEditStart->setEnabled(true);
+        ui->lineEditEnd->setEnabled(true);
+    }
+}
+
+void SearchForm::on_checkBoxCounter_clicked(bool checked)
+{
+    ui->checkBoxRadif->setEnabled(!checked);
+    ui->checkBoxGhafie->setEnabled(!checked);
+    singleCheckBoxClicked(checked);
+}
+
+void SearchForm::on_checkBoxRadif_clicked(bool checked)
+{
+    ui->checkBoxCounter->setEnabled(!checked);
+    ui->checkBoxGhafie->setEnabled(!checked);
+    singleCheckBoxClicked(checked);
+}
+
+void SearchForm::on_checkBoxGhafie_clicked(bool checked)
+{
+    ui->checkBoxCounter->setEnabled(!checked);
+    ui->checkBoxRadif->setEnabled(!checked);
+    singleCheckBoxClicked(checked);
 }

@@ -3,7 +3,6 @@
     Publisher: Rosybit
     Url: http://www.rosybit.com
     GitHub: https://github.com/abroshan39/ghazal
-    Version: 1.4
     Author: Aboutaleb Roshan [ab.roshan39@gmail.com]
     License: MIT License
 */
@@ -11,7 +10,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "appthemes.h"
-#include "event_functions.h"
 
 #include <QXmlStreamWriter>
 #include <QClipboard>
@@ -22,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    setWindowTitle(Constants::AppNameFa + ": کتابخانه شعر فارسی");
+    setWindowTitle(Constants::GhazalFa + ": کتابخانه شعر فارسی");
     setWindowIcon(QIcon(":/files/images/ghazal-256x256.png"));
     QApplication::setLayoutDirection(Qt::RightToLeft);
 
@@ -32,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
     searchRangeMenuCreator();
     slotMainDBChanged();
     readHistory();
-    widgetsStartup();
+    startup();
     applyStyleSheet();
     checkDBExist();
     tabHeaderLabel();
@@ -45,10 +43,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(qApp, &QGuiApplication::applicationStateChanged, this, &MainWindow::appStateChanged);
     connect(new KeyPress(ui->listWidget), &KeyPress::keyPressed, this, &MainWindow::listWidgetKeyPressed);
-    connect(new KeyPress(ui->tableWidget), &KeyPress::keyPressed, this, &MainWindow::tableWidgetKeyPressed);
+    connect(new KeyPress(ui->tableView), &KeyPress::keyPressed, this, &MainWindow::tableViewKeyPressed);
     connect(new KeyPress(ui->lineEditSearch), &KeyPress::keyPressed, this, &MainWindow::lineEditSearchKeyPressed);
-    connect(new ZWNJPress(ui->lineEditSearch), &ZWNJPress::zwnjPressed, this, &MainWindow::lineEditsZWNJPressed);
-    connect(new ZWNJPress(ui->lineEditPoet), &ZWNJPress::zwnjPressed, this, &MainWindow::lineEditsZWNJPressed);
+    connect(new FocusWatcher(ui->lineEditPoet), &FocusWatcher::focusChanged, this, &MainWindow::lineEditsFocusChanged);
+    connect(new FocusWatcher(ui->lineEditSearch), &FocusWatcher::focusChanged, this, &MainWindow::lineEditsFocusChanged);
+    connect((zwnjPoet = new ZWNJPress(ui->lineEditPoet)), &ZWNJPress::zwnjPressed, this, &MainWindow::lineEditsZWNJPressed);
+    connect((zwnjSearch = new ZWNJPress(ui->lineEditSearch)), &ZWNJPress::zwnjPressed, this, &MainWindow::lineEditsZWNJPressed);
 }
 
 MainWindow::~MainWindow()
@@ -67,13 +67,43 @@ void MainWindow::keyPressEvent(QKeyEvent *e)
     }
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
+void MainWindow::closeEvent(QCloseEvent *e)
 {
-    Q_UNUSED(event);  // (void)event;
+    Q_UNUSED(e);  // (void)e;
 
     writeSettings();
-    writeHistory();
+    if(appSettings.saveHistoryOnExit)
+        writeHistory();
     dbCloseRemove(appSettings.mainDB);
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent *e)
+{
+    if(e->mimeData()->hasUrls())
+        e->acceptProposedAction();
+}
+
+void MainWindow::dropEvent(QDropEvent *e)
+{
+    QString dropFilePath;
+    for(int i = 0; i < e->mimeData()->urls().count(); i++)
+    {
+        dropFilePath = e->mimeData()->urls().at(i).toLocalFile();
+        break;  // Only first item
+    }
+
+    if(QFileInfo(dropFilePath).isFile())
+    {
+        if(isStdGanjoorDB(dropFilePath))
+        {
+            appSettings.mainDBPath = dropFilePath;
+            slotMainDBChanged();
+        }
+        else
+        {
+            messageBox("خطا", "<b>خطا</b>:<br />فایل انتخاب‌شده قالب استانداردی ندارد!", Critical, this);
+        }
+    }
 }
 
 void MainWindow::appStateChanged(Qt::ApplicationState state)
@@ -82,7 +112,7 @@ void MainWindow::appStateChanged(Qt::ApplicationState state)
     {
         if(!isClipboardConnect)
         {
-            qDebug().noquote() << QString("%1 connected").arg(Constants::AppName);
+            qDebug().noquote() << QString("%1 connected").arg(Constants::Ghazal);
             connect(clipboard, &QClipboard::dataChanged, this, &MainWindow::changeTextCopiedToCB);
             isClipboardConnect = true;
         }
@@ -91,7 +121,7 @@ void MainWindow::appStateChanged(Qt::ApplicationState state)
     {
         if(isClipboardConnect)
         {
-            qDebug().noquote() << QString("%1 disconnected").arg(Constants::AppName);
+            qDebug().noquote() << QString("%1 disconnected").arg(Constants::Ghazal);
             disconnect(clipboard, &QClipboard::dataChanged, this, &MainWindow::changeTextCopiedToCB);
             isClipboardConnect = false;
         }
@@ -105,11 +135,11 @@ void MainWindow::changeTextCopiedToCB()
         clipboard->setText(text);
 }
 
-void MainWindow::setContents(QWidget *ptrTab, const QString &levelID, bool setFocusListWidget, bool rememberScrollBarValue, const QStringList &highlightText, const QString &bookmarkVerseID)
+void MainWindow::setContents(QWidget *ptrTab, const QString &levelID, bool setFocusListWidget, bool rememberScrollBarValue, const QStringList &highlightText, const QString &vorder, bool highlightVorder, bool highlightWithUnderline)
 {
-    connect(this, SIGNAL(sigSetTabContent(QString, bool, bool, QStringList, QString)), ptrTab, SLOT(slotSetTabContent(QString, bool, bool, QStringList, QString)));
-    emit sigSetTabContent(levelID, setFocusListWidget, rememberScrollBarValue, highlightText, bookmarkVerseID);
-    disconnect(this, SIGNAL(sigSetTabContent(QString, bool, bool, QStringList, QString)), ptrTab, SLOT(slotSetTabContent(QString, bool, bool, QStringList, QString)));
+    connect(this, SIGNAL(sigSetTabContent(QString, bool, bool, QStringList, QString, bool, bool)), ptrTab, SLOT(slotSetTabContent(QString, bool, bool, QStringList, QString, bool, bool)));
+    emit sigSetTabContent(levelID, setFocusListWidget, rememberScrollBarValue, highlightText, vorder, highlightVorder, highlightWithUnderline);
+    disconnect(this, SIGNAL(sigSetTabContent(QString, bool, bool, QStringList, QString, bool, bool)), ptrTab, SLOT(slotSetTabContent(QString, bool, bool, QStringList, QString, bool, bool)));
 }
 
 void MainWindow::on_listWidget_doubleClicked(const QModelIndex &index)
@@ -117,33 +147,46 @@ void MainWindow::on_listWidget_doubleClicked(const QModelIndex &index)
     poetSelected(index);
 }
 
-void MainWindow::on_tableWidget_doubleClicked(const QModelIndex &index)
+void MainWindow::on_tableView_doubleClicked(const QModelIndex &index)
 {
     if(searchAction->isChecked())
     {
         QString poetName = index.sibling(index.row(), 0).data(Qt::UserRole).toString();
-        QString id = index.sibling(index.row(), 1).data(Qt::UserRole).toString();
-        QStringList searchList = textListHighlight(appSettings.ss.searchPhrase);
+        QString levelIDVorder = index.sibling(index.row(), 1).data(Qt::UserRole).toString();
+        QStringList searchList = textListHighlight(appSettings.searchSettings.searchPhrase);
+        QStringList list(levelIDVorder.split("-"));
+        QString levelID;
+        QString vorder;
+
+        if(list.count() < 3)
+        {
+            levelID = list.join("-");
+        }
+        else
+        {
+            levelID = list[0] + "-" + list[1];
+            vorder = list[2];
+        }
 
         ui->tabWidget->setTabText(ui->tabWidget->currentIndex(), "  " + poetName + "  ");
-        setContents(appSettings.activeTab, id, false, false, searchList);
+        setContents(appSettings.activeTab, levelID, false, false, searchList, vorder, true, false);
     }
     else if(bookmarkListAction->isChecked())
     {
         QString poetName = index.sibling(index.row(), 0).data(Qt::UserRole).toString();
         QString verse_id = index.sibling(index.row(), 1).data(Qt::UserRole).toString();
-        QString id = index.sibling(index.row(), 2).data(Qt::UserRole).toString();
+        QString levelID = index.sibling(index.row(), 2).data(Qt::UserRole).toString();
 
-        fromClickOnTableWidget = true;
+        fromClickOnTable = true;
         ui->tabWidget->setTabText(ui->tabWidget->currentIndex(), "  " + poetName + "  ");
         if(verse_id == "-1")
-            setContents(appSettings.activeTab, id);
+            setContents(appSettings.activeTab, levelID);
         else
-            setContents(appSettings.activeTab, id, false, false, QStringList(), verse_id);
-        fromClickOnTableWidget = false;
+            setContents(appSettings.activeTab, levelID, false, false, QStringList(), verse_id, true);
+        fromClickOnTable = false;
     }
 
-    ui->tableWidget->setFocus();
+    ui->tableView->setFocus();
 }
 
 void MainWindow::poetSelected(const QModelIndex &index, bool setFocusListWidget)
@@ -305,7 +348,7 @@ void MainWindow::slotBookmarkChanged()
 {
     checkBookmark();
     if(bookmarkListAction->isChecked())
-        tableWidgetBookmark();
+        tableBookmark();
 }
 
 void MainWindow::on_checkBoxDarkMode_clicked(bool checked)
@@ -317,6 +360,14 @@ void MainWindow::on_checkBoxDarkMode_clicked(bool checked)
     applyStyleSheet();
 
     themeChanged();
+}
+
+void MainWindow::setTableViewModel(QStandardItemModel *model)
+{
+    QItemSelectionModel *m = ui->tableView->selectionModel();
+    ui->tableView->setModel(model);
+    if(m)
+        delete m;  // IMPORTANT
 }
 
 void MainWindow::listWidgetKeyPressed(QObject *object, QKeyEvent *event)
@@ -332,11 +383,11 @@ void MainWindow::listWidgetKeyPressed(QObject *object, QKeyEvent *event)
         poetSelected(ui->listWidget->currentIndex(), true);
 }
 
-void MainWindow::tableWidgetKeyPressed(QObject *object, QKeyEvent *event)
+void MainWindow::tableViewKeyPressed(QObject *object, QKeyEvent *event)
 {
     Q_UNUSED(object);  // (void)object;
     if(event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)
-        on_tableWidget_doubleClicked(ui->tableWidget->currentIndex());
+        on_tableView_doubleClicked(ui->tableView->currentIndex());
 }
 
 void MainWindow::lineEditSearchKeyPressed(QObject *object, QKeyEvent *event)
@@ -355,12 +406,21 @@ void MainWindow::lineEditsZWNJPressed(QObject *object, Qt::KeyboardModifier key)
     static_cast<QLineEdit *>(object)->insert(Constants::ZWNJ);
 }
 
+void MainWindow::lineEditsFocusChanged(QObject *object, QEvent *event)
+{
+    QLineEdit *lineEdit = static_cast<QLineEdit *>(object);
+    if(lineEdit == ui->lineEditPoet && event->type() == QEvent::FocusIn)
+        zwnjPoet->clear();
+    else if(lineEdit == ui->lineEditSearch && event->type() == QEvent::FocusIn)
+        zwnjSearch->clear();
+}
+
 void MainWindow::on_btnExportXML_clicked()
 {
-    if(!ui->tableWidget->rowCount())
+    if(!ui->tableView->model()->rowCount())
         return;
 
-    QString file_path = QFileDialog::getSaveFileName(this, "Save As", QDir::homePath() + "/" + Constants::AppName + "_SearchResult_" + QString(searchHistory.date).replace("/", "-") + "_" + QString(searchHistory.time).replace(":", "") + ".xml", "XML files (*.xml)");
+    QString file_path = QFileDialog::getSaveFileName(this, "Save As", QDir::homePath() + "/" + Constants::Ghazal + "_SearchResult_" + QString(searchHistory.date).replace("/", "-") + "_" + QString(searchHistory.time).replace(":", "") + ".xml", "XML files (*.xml)");
     if(file_path.isEmpty())
     {
         messageBox("خطا", "لطفا مسیر فایل خروجی را درست انتخاب کنید!.", Warning, this);
@@ -378,8 +438,8 @@ void MainWindow::on_btnExportXML_clicked()
     stream.setAutoFormattingIndent(4);
     stream.writeStartDocument("1.0");
 
-    stream.writeStartElement(Constants::AppName + "App");
-    stream.writeTextElement("Version", Constants::AppVersion);
+    stream.writeStartElement(Constants::Ghazal);
+    stream.writeTextElement("Version", Constants::GhazalVersion);
     stream.writeStartElement("SearchResult");
     stream.writeTextElement("Date", searchHistory.date);
     stream.writeTextElement("Time", searchHistory.time);
@@ -392,12 +452,12 @@ void MainWindow::on_btnExportXML_clicked()
         stream.writeAttribute("Summary", "AllItems");
     else
         stream.writeAttribute("Summary", "SelectedItems");
-    stream.writeAttribute("Count", QString::number(searchHistory.poetID.count()));
-    for(int i = 0; i < searchHistory.poetID.count(); i++)
+    stream.writeAttribute("Count", QString::number(searchHistory.poetIDList.count()));
+    for(int i = 0; i < searchHistory.poetIDList.count(); i++)
     {
         stream.writeStartElement("Item");
-        stream.writeAttribute("ID", searchHistory.poetID.at(i));
-        stream.writeCharacters(getPoetNameByPoetID(appSettings.mainDB, searchHistory.poetID.at(i)));
+        stream.writeAttribute("ID", searchHistory.poetIDList.at(i));
+        stream.writeCharacters(getPoetNameByPoetID(appSettings.mainDB, searchHistory.poetIDList.at(i)));
         stream.writeEndElement();  // Item
     }
     stream.writeEndElement();  // SearchRange
@@ -406,18 +466,18 @@ void MainWindow::on_btnExportXML_clicked()
     stream.writeTextElement("Count", QString::number(searchHistory.count));
     stream.writeStartElement("Results");
 
-    for(int i = 0; i < ui->tableWidget->rowCount(); i++)
+    for(int i = 0; i < ui->tableView->model()->rowCount(); i++)
     {
         stream.writeStartElement("Item");
-        stream.writeAttribute("ID", ui->tableWidget->item(i, 1)->data(Qt::UserRole).toString());
-        stream.writeAttribute("Name", ui->tableWidget->item(i, 0)->data(Qt::UserRole).toString());
-        stream.writeCharacters(ui->tableWidget->item(i, 1)->data(Qt::DisplayRole).toString());
+        stream.writeAttribute("ID", ui->tableView->model()->data(ui->tableView->model()->index(i, 1), Qt::UserRole).toString());
+        stream.writeAttribute("Name", ui->tableView->model()->data(ui->tableView->model()->index(i, 0), Qt::UserRole).toString());
+        stream.writeCharacters(ui->tableView->model()->data(ui->tableView->model()->index(i, 1), Qt::DisplayRole).toString());
         stream.writeEndElement();  // Item
     }
 
     stream.writeEndElement();  // Results
     stream.writeEndElement();  // SearchResult
-    stream.writeEndElement();  // GhazalApp
+    stream.writeEndElement();  // Ghazal
     stream.writeEndDocument();
     file.close();
 }

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>574</width>
-    <height>524</height>
+    <width>596</width>
+    <height>596</height>
    </rect>
   </property>
   <property name="font">
@@ -23,7 +23,7 @@
    <enum>Qt::RightToLeft</enum>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_6">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
      <widget class="QGroupBox" name="groupBox">
       <property name="accessibleName">
@@ -31,6 +31,9 @@
       </property>
       <property name="title">
        <string>  محدوده جست‌وجو  </string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_4">
        <item>
@@ -154,26 +157,102 @@
      </widget>
     </item>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
+     <widget class="QCheckBox" name="checkBoxShowItems">
+      <property name="accessibleName">
+       <string>class2</string>
+      </property>
+      <property name="text">
+       <string>نمایش موارد پیدا شده در حین جست‌وجو</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_8">
       <item>
-       <widget class="QCheckBox" name="skipDiacriticsCheckBox">
+       <widget class="QLabel" name="labelSearchMethod">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="accessibleName">
          <string>class2</string>
         </property>
         <property name="text">
-         <string>نادیده گرفتن حرکت کلمات</string>
+         <string>متد جست‌وجو:       </string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="skipCharTypesCheckBox">
+       <widget class="QRadioButton" name="radioMethod1">
         <property name="accessibleName">
          <string>class2</string>
         </property>
         <property name="text">
-         <string>نادیده گرفتن حالت‌های یک حرف</string>
+         <string>متد ۱ (سریع‌تر)   </string>
         </property>
        </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="radioMethod2">
+        <property name="accessibleName">
+         <string>class2</string>
+        </property>
+        <property name="text">
+         <string>متد ۲ (منظم‌تر)   </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_6">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_7">
+      <item>
+       <widget class="QCheckBox" name="checkBoxSkipDiacritics">
+        <property name="accessibleName">
+         <string>class2</string>
+        </property>
+        <property name="text">
+         <string>نادیده گرفتن حرکت کلمات   </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBoxSkipCharTypes">
+        <property name="accessibleName">
+         <string>class2</string>
+        </property>
+        <property name="text">
+         <string>نادیده گرفتن حالت‌های یک حرف       </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>
@@ -337,9 +416,9 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <layout class="QHBoxLayout" name="horizontalLayout_9">
         <item>
-         <widget class="QCheckBox" name="checkBoxHash">
+         <widget class="QLabel" name="labelStart">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -350,12 +429,106 @@
            <string>class2</string>
           </property>
           <property name="text">
-           <string>تعداد این کلمه یا عبارت: </string>
+           <string>شروع با: </string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEditHash">
+         <widget class="QLineEdit" name="lineEditStart">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelEnd">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="text">
+           <string>    پایان با: </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEditEnd">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QCheckBox" name="checkBoxGhafie">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="text">
+           <string>قافیه:  </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBoxRadif">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="text">
+           <string>ردیف:  </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBoxCounter">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="text">
+           <string>تعداد:  </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEditSingle">
           <property name="accessibleName">
            <string>class2</string>
           </property>
@@ -447,8 +620,12 @@
   <tabstop>lineEditExact</tabstop>
   <tabstop>lineEditOrder</tabstop>
   <tabstop>lineEditNeg</tabstop>
-  <tabstop>checkBoxHash</tabstop>
-  <tabstop>lineEditHash</tabstop>
+  <tabstop>lineEditStart</tabstop>
+  <tabstop>lineEditEnd</tabstop>
+  <tabstop>checkBoxGhafie</tabstop>
+  <tabstop>checkBoxRadif</tabstop>
+  <tabstop>checkBoxCounter</tabstop>
+  <tabstop>lineEditSingle</tabstop>
   <tabstop>btnSearch</tabstop>
   <tabstop>toolButton</tabstop>
   <tabstop>btnExamples</tabstop>
@@ -457,8 +634,11 @@
   <tabstop>selectAllCheckBox</tabstop>
   <tabstop>selectNoneCheckBox</tabstop>
   <tabstop>listWidget</tabstop>
-  <tabstop>skipDiacriticsCheckBox</tabstop>
-  <tabstop>skipCharTypesCheckBox</tabstop>
+  <tabstop>checkBoxShowItems</tabstop>
+  <tabstop>radioMethod1</tabstop>
+  <tabstop>radioMethod2</tabstop>
+  <tabstop>checkBoxSkipDiacritics</tabstop>
+  <tabstop>checkBoxSkipCharTypes</tabstop>
  </tabstops>
  <resources/>
  <connections/>

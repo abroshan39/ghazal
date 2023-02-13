@@ -3,7 +3,6 @@
     Publisher: Rosybit
     Url: http://www.rosybit.com
     GitHub: https://github.com/abroshan39/ghazal
-    Version: 1.4
     Author: Aboutaleb Roshan [ab.roshan39@gmail.com]
     License: MIT License
 */
@@ -48,9 +47,9 @@ TabForm::~TabForm()
     delete ui;
 }
 
-void TabForm::slotSetTabContent(const QString &levelID, bool setFocusListWidget, bool rememberScrollBarValue, const QStringList &highlightText, const QString &bookmarkVerseID)
+void TabForm::slotSetTabContent(const QString &levelID, bool setFocusListWidget, bool rememberScrollBarValue, const QStringList &highlightText, const QString &vorder, bool highlightVorder, bool highlightWithUnderline)
 {
-    setContents(levelID, true, rememberScrollBarValue, highlightText, bookmarkVerseID);
+    setContents(levelID, true, rememberScrollBarValue, highlightText, vorder, highlightVorder, highlightWithUnderline);
     if(setFocusListWidget)
     {
         ui->listWidget->setFocus();
@@ -71,10 +70,14 @@ void TabForm::on_label_linkActivated(const QString &link)
     ui->listWidget->setFocus();
 }
 
-void TabForm::setContents(const QString &levelID, bool clearPreItemRow, bool rememberScrollBarValue, const QStringList &highlightText, const QString &bookmarkVerseID)
+void TabForm::setContents(const QString &levelID, bool clearPreItemRow, bool rememberScrollBarValue, const QStringList &highlightText, const QString &vorder, bool highlightVorder, bool highlightWithUnderline)
 {
     const QString level(levelID.left(1));
     const QString id(levelID.right(levelID.size() - 2));
+
+    QString bookmarkVerseID(vorder);
+    if(!highlightVorder)
+        bookmarkVerseID.clear();
 
     GanjoorPath gp = recursiveIDs(appSettings->mainDB, level, id);
     int iLast = gp.text.count() - 1;
@@ -104,15 +107,24 @@ void TabForm::setContents(const QString &levelID, bool clearPreItemRow, bool rem
     {
         int pos = ui->textBrowser->verticalScrollBar()->value();
         if(appSettings->pDisplayType == Tak)
-            ui->textBrowser->setHtml(oldStyleHtml(appSettings->mainDB, id, appSettings->viewFSCurrent, appSettings->isDarkMode, highlightText, appSettings->showBookmarks, bookmarkVerseID));
+            ui->textBrowser->setHtml(oldStyleHtml(appSettings->mainDB, id, appSettings->viewFSCurrent, appSettings->isDarkMode, highlightText, appSettings->showBookmarks, bookmarkVerseID, highlightWithUnderline));
         else if(appSettings->pDisplayType == Joft)
-            ui->textBrowser->setHtml(newStyleHtml(appSettings->mainDB, id, appSettings->viewFSCurrent, appSettings->isDarkMode, highlightText, appSettings->showBookmarks, bookmarkVerseID, appSettings->hemistichDistance));
+            ui->textBrowser->setHtml(newStyleHtml(appSettings->mainDB, id, appSettings->viewFSCurrent, appSettings->isDarkMode, highlightText, appSettings->showBookmarks, bookmarkVerseID, highlightWithUnderline, appSettings->hemistichDistance));
         ui->listWidget->hide();
         ui->listWidget->clear();  // Increase the speed of changing theme
         ui->textBrowser->show();
         ui->textBrowser->setFocus();
         if(rememberScrollBarValue)
             ui->textBrowser->verticalScrollBar()->setValue(pos);
+        if(!vorder.isEmpty())
+        {
+            ui->textBrowser->scrollToAnchor("n" + vorder);
+            int n_sub = (ui->textBrowser->verticalScrollBar()->size().height() * 2) / 5;
+            int cur_value = ui->textBrowser->verticalScrollBar()->value();
+            int value = cur_value - n_sub < 0 ? 0 : cur_value - n_sub;
+            if(cur_value < ui->textBrowser->verticalScrollBar()->maximum())
+                ui->textBrowser->verticalScrollBar()->setValue(value);
+        }
 
         appSettings->tabCurrentPoem.insert(this, tabPath.last());
     }

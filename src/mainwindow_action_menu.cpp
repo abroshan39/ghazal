@@ -3,7 +3,6 @@
     Publisher: Rosybit
     Url: http://www.rosybit.com
     GitHub: https://github.com/abroshan39/ghazal
-    Version: 1.4
     Author: Aboutaleb Roshan [ab.roshan39@gmail.com]
     License: MIT License
 */
@@ -15,8 +14,9 @@
 #include "databaseform.h"
 #include "downloadform.h"
 #include "wordsearchform.h"
-#include "aboutauthorform.h"
 #include "abjadform.h"
+#include "updatecheckform.h"
+#include "aboutauthorform.h"
 #include "aboutform.h"
 
 #include <QMenuBar>
@@ -35,6 +35,7 @@ void MainWindow::appMenuCreator()
     QAction *newTabAction;
     QAction *closeTabAction;
     QAction *openAction;
+    QAction *saveAction;
     QAction *exitAction;
     QAction *previousAction;
     QAction *nextAction;
@@ -44,14 +45,16 @@ void MainWindow::appMenuCreator()
     QAction *zoomOutAction;
     QAction *defaultZoomLevelAction;
     QAction *refreshAction;
+    QAction *refreshPosAction;
     QAction *importBookmarkAction;
     QAction *exportBookmarkAction;
     QAction *databaseAction;
     QAction *downloadDBAction;
     QAction *abjadAction;
     QAction *settingsAction;
-    QAction *aboutAction;
+    QAction *updateCheckAction;
     QAction *aboutAuthorAction;
+    QAction *aboutAction;
 
     fileMenu = new QMenu(" پرونده ");
     navigationMenu = new QMenu(" ناوبری ");
@@ -65,6 +68,7 @@ void MainWindow::appMenuCreator()
     newTabAction = new QAction("برگ جدید");
     closeTabAction = new QAction("بستن برگه");
     openAction = new QAction("باز کردن");
+    saveAction = new QAction("ذخیره موقعیت فعلی");
     exitAction = new QAction("خروج");
     previousAction = new QAction("قبل");
     nextAction = new QAction("بعد");
@@ -77,6 +81,7 @@ void MainWindow::appMenuCreator()
     zoomOutAction = new QAction("کوچک‌تر کردن قلم");
     defaultZoomLevelAction = new QAction("بزرگنمایی پیش‌فرض");
     refreshAction = new QAction("تازه‌سازی");
+    refreshPosAction = new QAction("تازه‌سازی با حفظ موقعیت");
     bookmarkAction = new QAction("نشانه‌گذاری");
     bookmarkListAction = new QAction("صفحه نشانه‌ها");
     showBookmarksAction = new QAction("نمایش نشانه‌ها");
@@ -86,12 +91,14 @@ void MainWindow::appMenuCreator()
     downloadDBAction = new QAction("دانلود از مخزن");
     abjadAction = new QAction("محاسبه‌گر ابجد");
     settingsAction = new QAction("تنظیمات");
+    updateCheckAction = new QAction("بررسی بروزرسانی");
     aboutAuthorAction = new QAction("دربارهٔ نویسنده");
     aboutAction = new QAction("دربارهٔ برنامه");
 
     newTabAction->setShortcut(QKeySequence("Ctrl+T"));
     closeTabAction->setShortcut(QKeySequence("Ctrl+W"));
     openAction->setShortcut(QKeySequence("Ctrl+O"));
+    saveAction->setShortcut(QKeySequence("Ctrl+S"));
     exitAction->setShortcut(QKeySequence("Ctrl+Q"));
     previousAction->setShortcut(QKeySequence("Ctrl+Right"));
     nextAction->setShortcut(QKeySequence("Ctrl+Left"));
@@ -104,6 +111,7 @@ void MainWindow::appMenuCreator()
     zoomOutAction->setShortcut(QKeySequence("Ctrl+-"));
     defaultZoomLevelAction->setShortcut(QKeySequence("Ctrl+0"));
     refreshAction->setShortcut(QKeySequence("F5"));
+    refreshPosAction->setShortcut(QKeySequence("F6"));
     bookmarkAction->setShortcut(QKeySequence("Ctrl+D"));
     bookmarkListAction->setShortcut(QKeySequence("Ctrl+B"));
     showBookmarksAction->setShortcut(QKeySequence("Ctrl+Shift+B"));
@@ -122,6 +130,8 @@ void MainWindow::appMenuCreator()
     fileMenu->addAction(newTabAction);
     fileMenu->addAction(closeTabAction);
     fileMenu->addAction(openAction);
+    fileMenu->addAction(saveAction);
+    fileMenu->addSeparator();
     fileMenu->addAction(exitAction);
     navigationMenu->addAction(previousAction);
     navigationMenu->addAction(nextAction);
@@ -138,6 +148,7 @@ void MainWindow::appMenuCreator()
     viewMenu->addAction(defaultZoomLevelAction);
     viewMenu->addSeparator();
     viewMenu->addAction(refreshAction);
+    viewMenu->addAction(refreshPosAction);
     bookmarkMenu->addAction(bookmarkAction);
     bookmarkMenu->addAction(bookmarkListAction);
     bookmarkMenu->addSeparator();
@@ -151,6 +162,8 @@ void MainWindow::appMenuCreator()
     toolsMenu->addAction(abjadAction);
     toolsMenu->addSeparator();
     toolsMenu->addAction(settingsAction);
+    helpMenu->addAction(updateCheckAction);
+    helpMenu->addSeparator();
     helpMenu->addAction(aboutAuthorAction);
     helpMenu->addAction(aboutAction);
 
@@ -167,6 +180,7 @@ void MainWindow::appMenuCreator()
 
     connect(closeTabAction, &QAction::triggered, this, &MainWindow::actionCloseTab);
     connect(openAction, &QAction::triggered, this, &MainWindow::actionOpen);
+    connect(saveAction, &QAction::triggered, this, &MainWindow::actionSave);
     connect(exitAction, &QAction::triggered, this, &MainWindow::actionExit);
 
     connect(previousAction, &QAction::triggered, this, &MainWindow::actionPrevious);
@@ -189,6 +203,7 @@ void MainWindow::appMenuCreator()
     connect(zoomOutAction, &QAction::triggered, this, &MainWindow::actionZoomOut);
     connect(defaultZoomLevelAction, &QAction::triggered, this, &MainWindow::actionDefaultZoomLevel);
     connect(refreshAction, &QAction::triggered, this, &MainWindow::actionRefresh);
+    connect(refreshPosAction, &QAction::triggered, this, &MainWindow::actionRefreshPos);
 
     connect(bookmarkAction, &QAction::toggled, this, &MainWindow::actionBookmarkToggled);
     connect(bookmarkAction, &QAction::toggled, ui->checkBoxBookmark, &QCheckBox::setChecked);
@@ -205,6 +220,7 @@ void MainWindow::appMenuCreator()
     connect(downloadDBAction, &QAction::triggered, this, &MainWindow::actionDownloadDB);
     connect(abjadAction, &QAction::triggered, this, &MainWindow::actionAbjad);
     connect(settingsAction, &QAction::triggered, this, &MainWindow::actionSettings);
+    connect(updateCheckAction, &QAction::triggered, this, &MainWindow::actionUpdateCheck);
     connect(aboutAuthorAction, &QAction::triggered, this, &MainWindow::actionAboutAuthor);
     connect(aboutAction, &QAction::triggered, this, &MainWindow::actionAbout);
 
@@ -223,7 +239,7 @@ void MainWindow::appMenuCreator()
         showBookmarksAction->setChecked(true);
 }
 
-void MainWindow::slotAdjustMenuFont()
+void MainWindow::slotThemeAndMenuFont()
 {
     int size = (int)(appSettings.appFS.toDouble() + 0.5);
 
@@ -236,6 +252,7 @@ void MainWindow::slotAdjustMenuFont()
     toolsMenu->setFont(QFont(appSettings.appFN, size));
     helpMenu->setFont(QFont(appSettings.appFN, size));
     toolButtonMenu->setFont(QFont(appSettings.appFN, size));
+    ui->checkBoxDarkMode->setChecked(appSettings.isDarkMode);
 }
 
 void MainWindow::actionNewTab()
@@ -252,7 +269,7 @@ void MainWindow::actionCloseTab()
 
 void MainWindow::actionOpen()
 {
-    QString filter = "Database files (*.s3db *.db *.sqlite3 *.sqlite *.gdb);;All files (*.*)";
+    QString filter = "Database files (*.s3db *.db *.sqlite3 *.sqlite *.gdb);;All files (*)";
     QString file_name = QFileDialog::getOpenFileName(this, "Open", QDir::homePath(), filter);
     if(!file_name.isEmpty())
     {
@@ -262,8 +279,16 @@ void MainWindow::actionOpen()
             slotMainDBChanged();
         }
         else
+        {
             messageBox("خطا", "<b>خطا</b>:<br />فایل انتخاب‌شده قالب استانداردی ندارد!", Critical, this);
+        }
     }
+}
+
+void MainWindow::actionSave()
+{
+    writeSettings();
+    writeHistory();
 }
 
 void MainWindow::actionExit()
@@ -307,9 +332,10 @@ void MainWindow::actionSearchToggled(bool checked)
 {
     if(checked)
     {
+        int s_size0 = (size().height() * 4) / 7;
+        int s_size1 = size().height() - s_size0;
         bookmarkListAction->setChecked(false);
-        ui->splitter_2->setSizes({4000, 3000});
-        ui->tableWidget->setEnabled(true);
+        ui->splitter_2->setSizes({s_size0, s_size1});
         ui->lineEditSearch->show();
         ui->lineEditSearch->setEnabled(true);
         ui->btnSearch->show();
@@ -322,22 +348,19 @@ void MainWindow::actionSearchToggled(bool checked)
         ui->btnExportXML->setEnabled(true);
         ui->lineEditSearch->selectAll();
         ui->lineEditSearch->setFocus();
-        if(ui->tableWidget->columnCount() == 3)
-        {
-            ui->tableWidget->model()->removeRows(0, ui->tableWidget->model()->rowCount());
-            ui->tableWidget->model()->removeColumns(0, ui->tableWidget->model()->columnCount());
-            ui->tableWidget->horizontalHeader()->setDefaultSectionSize(300);
-        }
+        ui->tableView->setEnabled(true);
+        if(ui->tableView->model()->columnCount() == 3)
+            setTableViewModel(new QStandardItemModel);
     }
     else
     {
-        ui->splitter_2->setSizes({4000, 0});
-        ui->tableWidget->setEnabled(false);
+        ui->splitter_2->setSizes({size().height(), 0});
         ui->lineEditSearch->setEnabled(false);
         ui->btnSearch->setEnabled(false);
         ui->toolButton->setEnabled(false);
         ui->btnAdvancedSearch->setEnabled(false);
         ui->btnExportXML->setEnabled(false);
+        ui->tableView->setEnabled(false);
     }
 }
 
@@ -403,68 +426,64 @@ void MainWindow::actionRefresh()
     setContents(appSettings.activeTab, appSettings.tabLastLevelID.value(appSettings.activeTab));
 }
 
+void MainWindow::actionRefreshPos()
+{
+    setContents(appSettings.activeTab, appSettings.tabLastLevelID.value(appSettings.activeTab), false, true);
+}
+
 void MainWindow::actionBookmarkToggled(bool checked)
 {
     setBookmarked(appSettings.mainDB, appSettings.tabCurrentPoem.value(appSettings.activeTab), "-1", checked);
     if(bookmarkListAction->isChecked())
-        tableWidgetBookmark();
+        tableBookmark();
 }
 
 void MainWindow::actionBookmarkToggledList(bool checked)
 {
     if(checked)
     {
+        int s_size0 = (size().height() * 4) / 7;
+        int s_size1 = size().height() - s_size0;
         searchAction->setChecked(false);
-        ui->splitter_2->setSizes({4000, 3000});
+        ui->splitter_2->setSizes({s_size0, s_size1});
         ui->btnSearchForm->hide();
         ui->btnBookmarkForm->show();
-        ui->tableWidget->setEnabled(true);
         ui->lineEditSearch->hide();
         ui->btnSearch->hide();
         ui->toolButton->hide();
         ui->btnAdvancedSearch->hide();
         ui->btnExportXML->hide();
-        appSettings.ss.searchPhrase.clear();
+        ui->tableView->setEnabled(true);
+        appSettings.searchSettings.searchPhrase.clear();
     }
     else
     {
-        ui->splitter_2->setSizes({4000, 0});
+        ui->splitter_2->setSizes({size().height(), 0});
         ui->btnSearchForm->show();
         ui->btnBookmarkForm->hide();
-        ui->tableWidget->setEnabled(false);
+        ui->tableView->setEnabled(false);
         return;
     }
 
-    tableWidgetBookmark();
+    tableBookmark();
 }
 
-void MainWindow::tableWidgetBookmark()
+void MainWindow::tableBookmark()
 {
-    if(fromClickOnTableWidget)
+    if(fromClickOnTable)
         return;
 
-    ui->tableWidget->model()->removeRows(0, ui->tableWidget->model()->rowCount());
-    ui->tableWidget->model()->removeColumns(0, ui->tableWidget->model()->columnCount());
-
+    QStringList colList(QStringList() << "عنوان" << "محدوده" << "متن");
     QSqlQuery query("SELECT poem_id, verse_id FROM fav ORDER BY pos");
     QSqlQuery queryText;
 
-    ui->tableWidget->setColumnCount(3);
-    ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-    QStringList colList;
-    colList << "عنوان" << "محدوده" << "متن";
-    ui->tableWidget->setHorizontalHeaderLabels(colList);
-    ui->tableWidget->setColumnWidth(1, 120);
+    QStandardItemModel *modelBookmark = new QStandardItemModel;
+    setTableViewModel(new QStandardItemModel);
+    modelBookmark->setHorizontalHeaderLabels(colList);
 
     int row_count = 0;
     while(query.next())
     {
-        ui->tableWidget->insertRow(row_count);
-
-        QTableWidgetItem *item1 = new QTableWidgetItem;
-        QTableWidgetItem *item2 = new QTableWidgetItem;
-        QTableWidgetItem *item3 = new QTableWidgetItem;
         QString poemID = query.value(0).toString();
         QString verse_id = query.value(1).toString();
         QString vorder = verse_id == "-1" ? "1" : verse_id;
@@ -475,19 +494,25 @@ void MainWindow::tableWidgetBookmark()
         queryText.exec(QString("SELECT text FROM verse WHERE poem_id = %1 AND vorder = %2").arg(poemID, vorder));
         queryText.next();
 
-        item1->setText(spaceReplace(str, "…", 6));
-        item1->setData(Qt::UserRole, gp.text[iLast]);
-        item2->setText(verse_id == "-1" ? "کل متن" : "یک بخش");
-        item2->setData(Qt::UserRole, verse_id);
-        item3->setText(queryText.value(0).toString());
-        item3->setData(Qt::UserRole, "3-" + poemID);
+        QString item1Text = spaceReplace(str, "…", 6);
+        QString item2Text = verse_id == "-1" ? "کل متن" : "یک بخش";
+        QString item3Text = queryText.value(0).toString();
 
-        ui->tableWidget->setItem(row_count, 0, item1);
-        ui->tableWidget->setItem(row_count, 1, item2);
-        ui->tableWidget->setItem(row_count, 2, item3);
+        QStandardItem *item1 = new QStandardItem(item1Text);
+        QStandardItem *item2 = new QStandardItem(item2Text);
+        QStandardItem *item3 = new QStandardItem(item3Text);
+        item1->setData(gp.text[iLast], Qt::UserRole);
+        item2->setData(verse_id, Qt::UserRole);
+        item3->setData("3-" + poemID, Qt::UserRole);
+        modelBookmark->setItem(row_count, 0, item1);
+        modelBookmark->setItem(row_count, 1, item2);
+        modelBookmark->setItem(row_count, 2, item3);
 
         row_count++;
     }
+
+    setTableViewModel(modelBookmark);
+    ui->tableView->setColumnWidth(1, ui->tableView->horizontalHeader()->defaultSectionSize() / 3);
 }
 
 void MainWindow::actionShowBookmarks(bool checked)
@@ -552,11 +577,18 @@ void MainWindow::actionAbjad()
 void MainWindow::actionSettings()
 {
     SettingsForm *settingsForm = new SettingsForm(&appSettings, this);
-    connect(settingsForm, &SettingsForm::sigAdjustMenuFont, this, &MainWindow::slotAdjustMenuFont);
+    connect(settingsForm, &SettingsForm::sigWriteSettings, this, &MainWindow::writeSettings);
     connect(settingsForm, &SettingsForm::sigMainDBChanged, this, &MainWindow::slotMainDBChanged);
+    connect(settingsForm, &SettingsForm::sigThemeAndMenuFont, this, &MainWindow::slotThemeAndMenuFont);
     connect(settingsForm, SIGNAL(sigTabFormSize()), ui->tabWidget->currentWidget(), SLOT(slotTabFormSize()));
     connect(settingsForm, SIGNAL(sigTabTheme()), ui->tabWidget->currentWidget(), SLOT(slotTabTheme()));
     settingsForm->show();
+}
+
+void MainWindow::actionUpdateCheck()
+{
+    UpdateCheckForm *updateCheckForm = new UpdateCheckForm(&appSettings, this);
+    updateCheckForm->show();
 }
 
 void MainWindow::actionAboutAuthor()

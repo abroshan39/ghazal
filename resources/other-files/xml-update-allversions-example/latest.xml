@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Ghazal>
+  <Version>1.4</Version>
+  <VersionName>آغاز</VersionName>
+  <ReleaseDate>1401/02/13</ReleaseDate>
+  <Source>
+    <Url>https://github.com/abroshan39/ghazal/releases/download/v1.4/ghazal-1.4-src.tar.gz</Url>
+    <Size>2691570</Size>
+    <MD5>42a3a93fd8afc8b38078840b73e2edde</MD5>
+    <PGPSigUrl>https://github.com/abroshan39/ghazal/releases/download/v1.4/ghazal-1.4-src.tar.gz.sig</PGPSigUrl>
+  </Source>
+  <Distribution>
+    <Linux>
+      <Item>
+        <Url>https://github.com/abroshan39/ghazal/releases/download/v1.4/ghazal-1.4-linux-x64-installer.run</Url>
+        <Details>Linux x64 Installer Database</Details>
+        <Size>91144147</Size>
+        <MD5>419d1f5b942bc0b6c98bfff39f987c82</MD5>
+        <PGPSigUrl>https://github.com/abroshan39/ghazal/releases/download/v1.4/ghazal-1.4-linux-x64-installer.run.sig</PGPSigUrl>
+      </Item>
+      <Item>
+        <Url>https://github.com/abroshan39/ghazal/releases/download/v1.4/Ghazal-1.4-x86_64.AppImage</Url>
+        <Details>Linux x64 AppImage</Details>
+        <Size>24622272</Size>
+        <MD5>648c322f06febda18541fec863637c78</MD5>
+        <PGPSigUrl>https://github.com/abroshan39/ghazal/releases/download/v1.4/Ghazal-1.4-x86_64.AppImage.sig</PGPSigUrl>
+      </Item>
+    </Linux>
+    <Windows>
+      <Item>
+        <Url>https://github.com/abroshan39/ghazal/releases/download/v1.4/ghazal-1.4-windows-x86-installer.exe</Url>
+        <Details>Windows x86 Installer Database</Details>
+        <Size>56854289</Size>
+        <MD5>f9bca612c74f82ef844e25bd133453e5</MD5>
+        <PGPSigUrl>https://github.com/abroshan39/ghazal/releases/download/v1.4/ghazal-1.4-windows-x86-installer.exe.sig</PGPSigUrl>
+      </Item>
+      <Item>
+        <Url>https://github.com/abroshan39/ghazal/releases/download/v1.4/Ghazal-1.4-x86-win.7z</Url>
+        <Details>Windows x86 Portable</Details>
+        <Size>7926182</Size>
+        <MD5>2fbc70da2a02489eb4a1ad5ff7c88ae4</MD5>
+        <PGPSigUrl>https://github.com/abroshan39/ghazal/releases/download/v1.4/Ghazal-1.4-x86-win.7z.sig</PGPSigUrl>
+      </Item>
+    </Windows>
+  </Distribution>
+  <Database>
+    <Url>https://github.com/abroshan39/ghazal/releases/download/v1.4/ganjoor-database.tar.xz</Url>
+    <Size>47555396</Size>
+    <MD5>cd70a2e3fae0fccb3487006b07b27bb5</MD5>
+  </Database>
+  <Details>
+    <Line align="center" fontSize="1.35" fontWeight="bold">«اولین انتشار عمومی نرم‌افزار غزل»</Line>
+    <Line></Line>
+    <Line> + جست‌وجوی قوی، دقیق و ترکیبی</Line>
+    <Line> + قابلیت جست‌وجو در متن‌ها، عنوان‌ها و فهرست‌ها</Line>
+    <Line> + قابلیت جست‌وجو بدون در نظر گرفتن حرکت‌های حروف (فتحه، کسره و…)</Line>
+    <Line> + قابلیت جست‌وجو بدون در نظر گرفتن حالت‌های مختلف یک حرف (ی ي، ک ك و…)</Line>
+    <Line> + قابلیت چند برگه‌ای</Line>
+    <Line> + نشانه‌گذاری کلی و جزئی</Line>
+    <Line> + پوسته تاریک جهت مطالعه در شب</Line>
+    <Line> + محاسبه‌گر ابجد</Line>
+    <Line> + هایلایت متن مورد نظر در شعر (متن) جاری</Line>
+    <Line> + خروجی از پایگاه داده</Line>
+    <Line> + خروجی از نشانه‌ها</Line>
+    <Line> + خروجی از نتیجه جست‌وجو</Line>
+    <Line></Line>
+  </Details>
+</Ghazal>

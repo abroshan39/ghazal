@@ -198,7 +198,7 @@
       <widget class="QWidget" name="layoutWidget_3">
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QTableWidget" name="tableWidget">
+         <widget class="QTableView" name="tableView">
           <property name="font">
            <font>
             <family>Sahel FD</family>
@@ -215,7 +215,7 @@
            <enum>QAbstractItemView::SelectRows</enum>
           </property>
           <attribute name="horizontalHeaderDefaultSectionSize">
-           <number>300</number>
+           <number>350</number>
           </attribute>
           <attribute name="horizontalHeaderStretchLastSection">
            <bool>true</bool>
@@ -299,6 +299,24 @@
    </layout>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>listWidget</tabstop>
+  <tabstop>lineEditPoet</tabstop>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>checkBoxDarkMode</tabstop>
+  <tabstop>checkBoxBookmark</tabstop>
+  <tabstop>btnPrevious</tabstop>
+  <tabstop>btnNext</tabstop>
+  <tabstop>btnNewTab</tabstop>
+  <tabstop>btnBookmarkForm</tabstop>
+  <tabstop>btnSearchForm</tabstop>
+  <tabstop>tableView</tabstop>
+  <tabstop>lineEditSearch</tabstop>
+  <tabstop>btnSearch</tabstop>
+  <tabstop>toolButton</tabstop>
+  <tabstop>btnAdvancedSearch</tabstop>
+  <tabstop>btnExportXML</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -3,7 +3,6 @@
     Publisher: Rosybit
     Url: http://www.rosybit.com
     GitHub: https://github.com/abroshan39/ghazal
-    Version: 1.4
     Author: Aboutaleb Roshan [ab.roshan39@gmail.com]
     License: MIT License
 */
@@ -27,7 +26,8 @@ class DownloadForm : public QMainWindow
 {
     Q_OBJECT
 
-    enum DownloadType  // If you want to change this enum, do it carefully. Because the comboBoxSave items is connected to this enum.
+public:
+    enum DownloadType  // If you want to change this enum, do it carefully, because the comboBoxSave items is connected to this enum.
     {
         ImportToMainDB,
         ExportToNewDB,
@@ -53,11 +53,12 @@ signals:
     void sigUpdatePoetList();
 
 public slots:
-    void startWidgets();
+    void startup();
     void slotStartDownload();
     void slotCancel();
+    void slotRedirect(const QUrl &newUrl);
     void slotProgress(const QString &fileName, qint64 total, qint64 received, const QString &sSpeed, int leftHour, int leftMin, int leftSec);
-    void slotFinished();
+    void slotFinished(const QString &downloadedFilePath, const QString &originalFileName, const QString &renamedFileName, const QString &userFileName);
     void slotErorr(const QString &error);
     void slotTableWidgetItemChanged(QTableWidgetItem *item);
     void startDownload();
@@ -84,7 +85,7 @@ private slots:
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;
-    void closeEvent(QCloseEvent *event) override;
+    void closeEvent(QCloseEvent *e) override;
 
 private:
     Ui::DownloadForm *ui;
@@ -97,9 +98,8 @@ private:
     FileDownloader *fileDownloader = nullptr;
     bool isXml;
     QList<XmlPoet> xmlPoetList;
-    QDir qDir;
+    QDir tempDir;
     QString xmlDirName;
-    QString xmlFileName;
     QString dlDirName;
     QString dlFileName;
 

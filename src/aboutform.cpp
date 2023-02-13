@@ -3,7 +3,6 @@
     Publisher: Rosybit
     Url: http://www.rosybit.com
     GitHub: https://github.com/abroshan39/ghazal
-    Version: 1.4
     Author: Aboutaleb Roshan [ab.roshan39@gmail.com]
     License: MIT License
 */
@@ -28,6 +27,7 @@ AboutForm::AboutForm(AppSettings *appSettings, QWidget *parent) :
 
     this->appSettings = appSettings;
 
+    resize((int)(665 * appSettings->screenRatio), (int)(370 * appSettings->screenRatio));
     setGeometry(QStyle::alignedRect(Qt::RightToLeft, Qt::AlignCenter, size(), QGuiApplication::primaryScreen()->availableGeometry()));
     setWindowTitle("درباره برنامه");
     setWindowIcon(QIcon(":/files/images/ghazal-256x256.png"));
@@ -51,6 +51,7 @@ void AboutForm::setHtml()
 {
     QString html;
     QString textColor = appSettings->isDarkMode ? "white" : "black";
+    QString verNameHtml = Constants::GhazalVersionName.isEmpty() ? "" : QString("\n<p dir=\"rtl\" align=\"right\">نام نسخه: %1</p>").arg(Constants::GhazalVersionName);
     QString persian_date;
     QDate date(QDate::fromString(QString(__DATE__).simplified(), "MMM d yyyy"));
     QFile file(":/files/html/about_ghazal.html");
@@ -64,21 +65,22 @@ void AboutForm::setHtml()
     html = file.readAll();
     file.close();
 
-    html.replace(QRegularExpression("\\$\\{FontName\\}"), appSettings->viewFN);
-    html.replace(QRegularExpression("\\$\\{FontSize\\}"), QString::number(appSettings->viewFS.toDouble()));
-    html.replace(QRegularExpression("\\$\\{TitleFontSize\\}"), ratioFontSize(appSettings->viewFS.toDouble(), 1.5));
-    html.replace(QRegularExpression("\\$\\{TopicFontSize\\}"), ratioFontSize(appSettings->viewFS.toDouble(), 1.25));
-    html.replace(QRegularExpression("\\$\\{TextColor\\}"), textColor);
-    html.replace(QRegularExpression("\\$\\{Rosybit\\}"), Constants::Rosybit);
-    html.replace(QRegularExpression("\\$\\{RosybitUrl\\}"), Constants::RosybitUrl);
-    html.replace(QRegularExpression("\\$\\{AppName\\}"), Constants::AppName);
-    html.replace(QRegularExpression("\\$\\{AppNameFa\\}"), Constants::AppNameFa);
-    html.replace(QRegularExpression("\\$\\{AppVersion\\}"), Constants::AppVersion);
-    html.replace(QRegularExpression("\\$\\{AppBuildDate\\}"), QString(__TIME__) + "  " + persian_date);
-    html.replace(QRegularExpression("\\$\\{AppUrl\\}"), Constants::AppUrl);
-    html.replace(QRegularExpression("\\$\\{GitHub\\}"), Constants::GitHub);
-    html.replace(QRegularExpression("\\$\\{Email\\}"), Constants::Email);
-    html.replace(QRegularExpression("\\$\\{QtVersion\\}"), QT_VERSION_STR);
+    html.replace("${FontName}", appSettings->viewFN);
+    html.replace("${FontSize}", QString::number(appSettings->viewFS.toDouble()));
+    html.replace("${TitleFontSize}", ratioFontSize(appSettings->viewFS.toDouble(), 1.5));
+    html.replace("${TopicFontSize}", ratioFontSize(appSettings->viewFS.toDouble(), 1.25));
+    html.replace("${TextColor}", textColor);
+    html.replace("${Rosybit}", Constants::Rosybit);
+    html.replace("${RosybitUrl}", Constants::RosybitUrl);
+    html.replace("${Ghazal}", Constants::Ghazal);
+    html.replace("${GhazalFa}", Constants::GhazalFa);
+    html.replace("${GhazalVersion}", Constants::GhazalVersion);
+    html.replace("${GhazalVersionName}", verNameHtml);
+    html.replace("${GhazalBuildDate}", QString(__TIME__) + "  " + persian_date);
+    html.replace("${GhazalUrl}", Constants::GhazalUrl);
+    html.replace("${GhazalGitHub}", Constants::GhazalGitHub);
+    html.replace("${Email}", Constants::Email);
+    html.replace("${QtVersion}", QT_VERSION_STR);
 
     ui->textBrowser->setHtml(html);
 }

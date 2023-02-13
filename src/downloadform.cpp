@@ -3,7 +3,6 @@
     Publisher: Rosybit
     Url: http://www.rosybit.com
     GitHub: https://github.com/abroshan39/ghazal
-    Version: 1.4
     Author: Aboutaleb Roshan [ab.roshan39@gmail.com]
     License: MIT License
 */
@@ -32,26 +31,29 @@ DownloadForm::DownloadForm(AppSettings *appSettings, QWidget *parent) :
 
     this->appSettings = appSettings;
 
-    downloadType = ImportToMainDB;
-    ui->lineEditSaveLocation->setText(QDir::toNativeSeparators(appSettings->mainDBPath));
-
+    resize((int)(704 * appSettings->screenRatio), (int)(416 * appSettings->screenRatio));
     setGeometry(QStyle::alignedRect(Qt::RightToLeft, Qt::AlignCenter, size(), QGuiApplication::primaryScreen()->availableGeometry()));
     setWindowTitle("دانلود از مخزن");
     setWindowIcon(QIcon(":/files/images/ghazal-256x256.png"));
     setWindowModality(Qt::WindowModal);
 
-    startWidgets();
+    downloadType = ImportToMainDB;
+    ui->lineEditSaveLocation->setText(QDir::toNativeSeparators(appSettings->mainDBPath));
+    ui->lineEditSaveLocation->setCursorPosition(0);
 
     ui->comboBoxSave->addItem("ذخیره در پایگاه داده اصلی", ImportToMainDB);
     ui->comboBoxSave->addItem("خروجی در یک پایگاه داده جدید", ExportToNewDB);
     ui->comboBoxSave->addItem("فقط دانلود فایل خام", OnlyDownloadFiles);
 
-    fileDownloader = new FileDownloader();
+    fileDownloader = new FileDownloader;
     connect(fileDownloader, &FileDownloader::sigStartDownload, this, &DownloadForm::slotStartDownload);
     connect(fileDownloader, &FileDownloader::sigCancel, this, &DownloadForm::slotCancel);
+    connect(fileDownloader, &FileDownloader::sigRedirect, this, &DownloadForm::slotRedirect);
     connect(fileDownloader, &FileDownloader::sigProgress, this, &DownloadForm::slotProgress);
     connect(fileDownloader, &FileDownloader::sigFinished, this, &DownloadForm::slotFinished);
     connect(fileDownloader, &FileDownloader::sigErorr, this, &DownloadForm::slotErorr);
+
+    startup();
 }
 
 DownloadForm::~DownloadForm()
@@ -71,14 +73,14 @@ void DownloadForm::keyPressEvent(QKeyEvent *e)
         on_btnClose_clicked();
 }
 
-void DownloadForm::closeEvent(QCloseEvent *event)
+void DownloadForm::closeEvent(QCloseEvent *e)
 {
     if(downloadFlag == IsDownloading)
     {
         int reply = messageBox("خروج؟", "نرم‌افزار در حال دانلود است. آیا می‌خواهید دانلود را متوقف کنید و از صفحهٔ دانلود خارج شوید؟", WarningQuestion, this);
         if(reply == QMessageBox::No)
         {
-            event->ignore();
+            e->ignore();
             return;
         }
         cancelClose = true;
@@ -86,7 +88,7 @@ void DownloadForm::closeEvent(QCloseEvent *event)
         fileDownloader->cancel();
     }
 
-    QWidget::closeEvent(event);
+    QWidget::closeEvent(e);
 }
 
 void DownloadForm::on_btnClose_clicked()
@@ -94,10 +96,10 @@ void DownloadForm::on_btnClose_clicked()
     close();
 }
 
-void DownloadForm::startWidgets()
+void DownloadForm::startup()
 {
-    qDir.setPath(QDir::tempPath());
-    ui->lineEdit->setText("http://i.ganjoor.net/android/androidgdbs.xml");
+    tempDir.setPath(QDir::tempPath());
+    ui->lineEdit->setText(Constants::DefaultGDBXmlUrl);
     ui->labelSaveLocation->setText("<p align=\"left\">:محل ذخیره‌سازی</p>");
     ui->btnCancel->hide();
     ui->labelPoetName->hide();
@@ -105,12 +107,15 @@ void DownloadForm::startWidgets()
     ui->progressBarOne->hide();
     ui->progressBarAll->hide();
 
-    ui->tableWidget->setColumnCount(3);
+    int dSectionSize = 230;
+    int n = dSectionSize * appSettings->screenRatio;
+    int add = (n - dSectionSize) / 3;
+    add = add < 0 ? 0 : add;
+    ui->tableWidget->horizontalHeader()->setDefaultSectionSize(dSectionSize + add);
+    ui->tableWidget->horizontalHeader()->setStretchLastSection(true);
+    ui->tableWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->tableWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    QStringList colList;
-    colList << "نام شاعر یا نویسنده" << "حجم فایل" << "تاریخ انتشار";
-    ui->tableWidget->setHorizontalHeaderLabels(colList);
-    ui->tableWidget->horizontalHeader()->setDefaultSectionSize(180);
 }
 
 void DownloadForm::on_btnSearchOnGanjoor_clicked()
@@ -122,16 +127,13 @@ void DownloadForm::on_btnSearchOnGanjoor_clicked()
     ui->comboBox->setCurrentIndex(0);
 
     QString url = ui->lineEdit->text();
-    QFileInfo xmlFN(url);
-
-    xmlDirName = Constants::Rosybit.toLower() + "-xml-" + randString();
-    xmlFileName = xmlFN.fileName();
+    xmlDirName = Constants::Rosybit.toLower() + "-" + randString();
 
     ui->tableWidget->model()->removeRows(0, ui->tableWidget->model()->rowCount());
 
-    if(qDir.mkdir(xmlDirName))
+    if(tempDir.mkdir(xmlDirName))
     {
-        fileDownloader->download(url, qDir.path() + "/" + xmlDirName);
+        fileDownloader->download(QUrl(url), tempDir.path() + "/" + xmlDirName);
         ui->btnSearchOnGanjoor->setEnabled(false);
     }
 }
@@ -205,32 +207,35 @@ void DownloadForm::downloadLoop()
 
     QString url = selectedPoets.first()[2];
     QString poetName = selectedPoets.first()[1];
-    QFileInfo dlFN(url);
 
     ui->labelPoetName->setText(QString("در حال دانلود دیتابیس مربوط به <b>%1</b>:").arg(poetName));
 
     dlDirName = Constants::Rosybit.toLower() + "-" + randString();
-    dlFileName = dlFN.fileName();
+    dlFileName = QFileInfo(url).fileName();
 
     if(downloadType == ImportToMainDB || downloadType == ExportToNewDB)
     {
-        if(qDir.mkdir(dlDirName))
-            fileDownloader->download(url, qDir.path() + "/" + dlDirName);
+        if(tempDir.mkdir(dlDirName))
+            fileDownloader->download(QUrl(url), tempDir.path() + "/" + dlDirName);
     }
     else if(downloadType == OnlyDownloadFiles)
     {
-        fileDownloader->download(url, onlyDownloadFilesDirPath);
+        fileDownloader->download(QUrl(url), onlyDownloadFilesDirPath);
     }
 }
 
-void DownloadForm::slotFinished()
+void DownloadForm::slotFinished(const QString &downloadedFilePath, const QString &originalFileName, const QString &renamedFileName, const QString &userFileName)
 {
+    Q_UNUSED(originalFileName);  // (void)originalFileName;
+    Q_UNUSED(renamedFileName);   // (void)renamedFileName;
+    Q_UNUSED(userFileName);      // (void)userFileName;
+
     if(isXml)
     {
         ui->progressBarOne->hide();
 
         QDomDocument document;
-        QFile file(qDir.path() + "/" + xmlDirName + "/" + xmlFileName);
+        QFile file(downloadedFilePath);
         file.open(QIODevice::ReadOnly | QIODevice::Text);
         document.setContent(&file);
         file.close();
@@ -253,30 +258,31 @@ void DownloadForm::slotFinished()
     {
         if(downloadType == ImportToMainDB || downloadType == ExportToNewDB)
         {
-            QString dlDirPath = qDir.path() + "/" + dlDirName;
-            QString dlFilePath = dlDirPath + "/" + dlFileName;
-
-            if(dlFilePath.endsWith(".zip", Qt::CaseInsensitive))
+            if(downloadedFilePath.endsWith(".zip", Qt::CaseInsensitive))
             {
-                QStringList list = JlCompress::getFileList(dlFilePath);
+                QStringList list = JlCompress::getFileList(downloadedFilePath);
                 QStringList dbList;
 
                 for(int i = 0; i < list.count(); i++)
                     if(dbExtCheck(list[i]))
                         dbList << list[i];
 
-                dbList = JlCompress::extractFiles(dlFilePath, dbList, dlDirPath);
+                dbList = JlCompress::extractFiles(downloadedFilePath, dbList, QFileInfo(downloadedFilePath).absolutePath());
 
                 for(int i = 0; i < dbList.count(); i++)
+                {
                     if(isStdGanjoorDB(dbList[i]))
                         writeToDB(dbList[i]);
+                    else
+                        qDebug().noquote() << QString("Cannot open the input file as a database file! [%1]").arg(dbList[i]);
+                }
             }
             else
             {
-                if(isStdGanjoorDB(dlFilePath))
-                    writeToDB(dlFilePath);
+                if(isStdGanjoorDB(downloadedFilePath))
+                    writeToDB(downloadedFilePath);
                 else
-                    qDebug().noquote() << "Cannot open downloaded file as a database file!";
+                    qDebug().noquote() << QString("Cannot open the input file as a database file! [%1]").arg(downloadedFilePath);
             }
             removeTempDir(dlDirName);
         }
@@ -311,6 +317,12 @@ void DownloadForm::slotCancel()
 {
     downloadFlag = Canceled;
     downloadLoopEnd();
+}
+
+void DownloadForm::slotRedirect(const QUrl &newUrl)
+{
+    Q_UNUSED(newUrl);  // (void)newUrl;
+    qDebug().noquote() << "URL redirection";
 }
 
 void DownloadForm::slotProgress(const QString &fileName, qint64 total, qint64 received, const QString &sSpeed, int leftHour, int leftMin, int leftSec)
@@ -603,6 +615,7 @@ void DownloadForm::on_comboBoxSave_currentIndexChanged(int index)
         ui->lineEditSaveLocation->setText(QDir::toNativeSeparators(appSettings->mainDBPath));
     else
         ui->lineEditSaveLocation->clear();
+    ui->lineEditSaveLocation->setCursorPosition(0);
 }
 
 bool DownloadForm::check_DB_DirPath()
@@ -621,6 +634,7 @@ bool DownloadForm::check_DB_DirPath()
             {
                 emit sigMainDBChanged();
                 ui->lineEditSaveLocation->setText(QDir::toNativeSeparators(appSettings->mainDBPath));
+                ui->lineEditSaveLocation->setCursorPosition(0);
                 return true;
             }
         }
@@ -633,6 +647,7 @@ bool DownloadForm::check_DB_DirPath()
         if(!exportToNewDBPath.isEmpty())
         {
             ui->lineEditSaveLocation->setText(QDir::toNativeSeparators(exportToNewDBPath));
+            ui->lineEditSaveLocation->setCursorPosition(0);
             exportDB.setDatabase(exportToNewDBPath, "exportDatabase");
             return true;
         }
@@ -649,6 +664,7 @@ bool DownloadForm::check_DB_DirPath()
             if(!onlyDownloadFilesDirPath.isEmpty())
             {
                 ui->lineEditSaveLocation->setText(QDir::toNativeSeparators(onlyDownloadFilesDirPath));
+                ui->lineEditSaveLocation->setCursorPosition(0);
                 return true;
             }
         }

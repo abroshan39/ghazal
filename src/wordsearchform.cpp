@@ -3,7 +3,6 @@
     Publisher: Rosybit
     Url: http://www.rosybit.com
     GitHub: https://github.com/abroshan39/ghazal
-    Version: 1.4
     Author: Aboutaleb Roshan [ab.roshan39@gmail.com]
     License: MIT License
 */
@@ -28,6 +27,7 @@ WordSearchForm::WordSearchForm(AppSettings *appSettings, QWidget *parent) :
     this->appSettings = appSettings;
 
     appSettings->isOpenWordSearchForm = true;
+    resize((int)(250 * appSettings->screenRatio), 88);
     setGeometry(QStyle::alignedRect(Qt::RightToLeft, Qt::AlignCenter, size(), QGuiApplication::primaryScreen()->availableGeometry()));
     setWindowTitle("جست‌وجو");
     setWindowIcon(QIcon(":/files/images/ghazal-256x256.png"));
@@ -43,42 +43,42 @@ WordSearchForm::~WordSearchForm()
 
 void WordSearchForm::keyPressEvent(QKeyEvent *e)
 {
-    if(e->key() == Qt::Key_Return)
+    if(e->key() == Qt::Key_Return || e->key() == Qt::Key_Enter)
         on_pushButton_clicked();
     if(e->key() == Qt::Key_Escape)
         close();
 }
 
-void WordSearchForm::closeEvent(QCloseEvent *event)
+void WordSearchForm::closeEvent(QCloseEvent *e)
 {
-    Q_UNUSED(event);  // (void)event;
+    Q_UNUSED(e);  // (void)e;
     appSettings->isOpenWordSearchForm = false;
 }
 
 void WordSearchForm::on_pushButton_clicked()
 {
-    QRegularExpression regex("^:{2}([123]\\-\\d+|\\d+)$");  // ^:{2}([123]\-\d+|\d+)$
+    QRegularExpression regex("^:{2}([123]\\-)?(\\d+)(\\-\\d+([hb])?)?$");  // ^:{2}([123]\-)?(\d+)(\-\d+([hb])?)?$
     QRegularExpressionMatch match = regex.match(ui->lineEdit->text());
     if(match.hasMatch())
     {
-        if(match.captured(1).contains("-"))
-        {
-            QString levelID = match.captured(1);
-            QStringList list = levelID.split("-");
+        QSqlQuery query;
+        QString level(match.captured(1).remove("-"));
+        QString id(match.captured(2));
+        QString vorder(match.captured(3).remove(QRegularExpression("[\\-hb]")));
+        bool highlight = !match.captured(4).isEmpty();
 
-            QSqlQuery query;
-            if(list[0] == "3")
-                query.exec("SELECT * FROM poem WHERE id = " + list[1]);
+        if(!level.isEmpty())
+        {
+            if(level == "3")
+                query.exec("SELECT * FROM poem WHERE id = " + id);
             else
-                query.exec("SELECT * FROM cat WHERE id = " + list[1]);
+                query.exec("SELECT * FROM cat WHERE id = " + id);
 
             if(query.first())
             {
-                connect(this, SIGNAL(sigSetTabContent(QString, bool, bool, QStringList, QString)), appSettings->activeTab, SLOT(slotSetTabContent(QString, bool, bool, QStringList, QString)));
-                emit sigSetTabContent(levelID, false, false, QStringList(), QString());
-                disconnect(this, SIGNAL(sigSetTabContent(QString, bool, bool, QStringList, QString)), appSettings->activeTab, SLOT(slotSetTabContent(QString, bool, bool, QStringList, QString)));
+                setContents(appSettings->activeTab, level + "-" + id, false, false, QStringList(), vorder, highlight);
 
-                GanjoorPath gp = recursiveIDs(appSettings->mainDB, levelID);
+                GanjoorPath gp = recursiveIDs(appSettings->mainDB, level + "-" + id);
                 int tabIndex = appSettings->tabWidget->indexOf(appSettings->activeTab);
                 appSettings->tabWidget->setTabText(tabIndex, "  " + gp.text[gp.text.count() - 1] + "  ");
                 return;
@@ -86,11 +86,11 @@ void WordSearchForm::on_pushButton_clicked()
         }
         else
         {
-            QString level, id = match.captured(1);
-            QSqlQuery query;
             query.exec("SELECT * FROM poem WHERE id = " + id);
             if(query.first())
+            {
                 level = "3";
+            }
             else
             {
                 query.exec("SELECT * FROM cat WHERE id = " + id);
@@ -100,9 +100,7 @@ void WordSearchForm::on_pushButton_clicked()
 
             if(!level.isEmpty())
             {
-                connect(this, SIGNAL(sigSetTabContent(QString, bool, bool, QStringList, QString)), appSettings->activeTab, SLOT(slotSetTabContent(QString, bool, bool, QStringList, QString)));
-                emit sigSetTabContent(level + "-" + id, false, false, QStringList(), QString());
-                disconnect(this, SIGNAL(sigSetTabContent(QString, bool, bool, QStringList, QString)), appSettings->activeTab, SLOT(slotSetTabContent(QString, bool, bool, QStringList, QString)));
+                setContents(appSettings->activeTab, level + "-" + id, false, false, QStringList(), vorder, highlight);
 
                 GanjoorPath gp = recursiveIDs(appSettings->mainDB, level + "-" + id);
                 int tabIndex = appSettings->tabWidget->indexOf(appSettings->activeTab);
@@ -113,10 +111,14 @@ void WordSearchForm::on_pushButton_clicked()
     }
 
     QStringList list(textListHighlight(ui->lineEdit->text()));
+    setContents(appSettings->activeTab, appSettings->tabLastLevelID.value(appSettings->activeTab), false, true, list);
+}
 
-    connect(this, SIGNAL(sigSetTabContent(QString, bool, bool, QStringList, QString)), appSettings->activeTab, SLOT(slotSetTabContent(QString, bool, bool, QStringList, QString)));
-    emit sigSetTabContent(appSettings->tabLastLevelID.value(appSettings->activeTab), false, true, list, QString());
-    disconnect(this, SIGNAL(sigSetTabContent(QString, bool, bool, QStringList, QString)), appSettings->activeTab, SLOT(slotSetTabContent(QString, bool, bool, QStringList, QString)));
+void WordSearchForm::setContents(QWidget *ptrTab, const QString &levelID, bool setFocusListWidget, bool rememberScrollBarValue, const QStringList &highlightText, const QString &vorder, bool highlightVorder, bool highlightWithUnderline)
+{
+    connect(this, SIGNAL(sigSetTabContent(QString, bool, bool, QStringList, QString, bool, bool)), ptrTab, SLOT(slotSetTabContent(QString, bool, bool, QStringList, QString, bool, bool)));
+    emit sigSetTabContent(levelID, setFocusListWidget, rememberScrollBarValue, highlightText, vorder, highlightVorder, highlightWithUnderline);
+    disconnect(this, SIGNAL(sigSetTabContent(QString, bool, bool, QStringList, QString, bool, bool)), ptrTab, SLOT(slotSetTabContent(QString, bool, bool, QStringList, QString, bool, bool)));
 }
 
 void WordSearchForm::lineEditZWNJPressed(QObject *object, Qt::KeyboardModifier key)

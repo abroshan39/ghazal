@@ -3,7 +3,6 @@
     Publisher: Rosybit
     Url: http://www.rosybit.com
     GitHub: https://github.com/abroshan39/ghazal
-    Version: 1.4
     Author: Aboutaleb Roshan [ab.roshan39@gmail.com]
     License: MIT License
 */
@@ -16,14 +15,20 @@ const QString Constants::RosybitUrl = "http://www.rosybit.com";
 const QString Constants::Programmer = "Aboutaleb Roshan";
 const QString Constants::ProgrammerFa = "ابوطالب روشن";
 const QString Constants::Email = "ab.roshan39@gmail.com";
-const QString Constants::AppName = "Ghazal";
-const QString Constants::AppNameFa = "غزل";
-const QString Constants::AppVersion = "1.4";
-const QString Constants::GitHub = "https://github.com/abroshan39/ghazal";
-const QString Constants::AppUrl = "http://www.rosybit.com/apps/ghazal";
-const QString Constants::DefaultDBName = "ganjoor.s3db";
+const QString Constants::Ghazal = "Ghazal";
+const QString Constants::GhazalFa = "غزل";
+const QString Constants::GhazalLicense = "MIT License";
+const QString Constants::GhazalVersion = QString("%1.%2%3").arg(VERSION_MAJOR).arg(VERSION_MINOR).arg(VERSION_PATCH ? QString(".%1").arg(VERSION_PATCH) : "");
+const QString Constants::GhazalVersionName = QString(VERSION_NAME);
+const QString Constants::GhazalGitHub = "https://github.com/abroshan39/ghazal";
+const QString Constants::GhazalUrl = "http://ghazal.rosybit.com";
+const QString Constants::GhazalUpdateXmlUrl = "http://www.rosybit.com/products/ghazal/latest.xml";
+const QString Constants::GhazalAllVersionsXmlUrl = "http://www.rosybit.com/products/ghazal/allversions.xml";
+const QString Constants::GhazalConfFileName = "ghazal.conf";
 const QString Constants::SettingsFileName = "settings.conf";
 const QString Constants::HistoryFileName = "history.ghl";
+const QString Constants::DefaultDBName = "ganjoor.s3db";
+const QString Constants::DefaultGDBXmlUrl = "http://i.ganjoor.net/android/androidgdbs.xml";
 
 bool isStdGanjoorDB(const QSqlDatabase &database, DatabaseType databaseType)
 {
@@ -645,7 +650,6 @@ void tableWidgetDownloadList(QTableWidget *tableWidget, const QSqlDatabase &main
     tableWidget->model()->removeRows(0, tableWidget->model()->rowCount());
     tableWidget->model()->removeColumns(0, tableWidget->model()->columnCount());
     tableWidget->setColumnCount(5);
-    tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     QStringList colList;
     colList << "نام شاعر یا نویسنده" << "حجم فایل" << "تاریخ انتشار";
@@ -726,7 +730,7 @@ void tableWidgetDownloadList(QTableWidget *tableWidget, const QSqlDatabase &main
     }
     tableWidget->hideColumn(3);
     tableWidget->hideColumn(4);
-    tableWidget->horizontalHeader()->setDefaultSectionSize(180);
+    tableWidget->setColumnWidth(1, (tableWidget->horizontalHeader()->defaultSectionSize() / 3) * 2);
 }
 
 void dbCloseRemove(QSqlDatabase *database)
@@ -747,7 +751,7 @@ void dbCloseRemove(QSqlDatabase &database)
     database.removeDatabase(connection);
 }
 
-QString oldStyleHtml(const QSqlDatabase &database, const QString &poemID, const QString &fontSize, bool isDarkMode, const QStringList &highlightText, bool showAllBookmarks, const QString &bookmarkVerseID)
+QString oldStyleHtml(const QSqlDatabase &database, const QString &poemID, const QString &fontSize, bool isDarkMode, const QStringList &highlightText, bool showAllBookmarks, const QString &bookmarkVerseID, bool bookmarkWithUnderline)
 {
     QSqlQuery query(database), queryIn(database);
     QString textColor = isDarkMode ? "white" : "black";
@@ -758,7 +762,7 @@ QString oldStyleHtml(const QSqlDatabase &database, const QString &poemID, const 
     bool highlight = !highlightText.isEmpty();
     bool showBookmark = !bookmarkVerseID.isEmpty();
 
-    query.exec("SELECT title FROM poem WHERE id = " + poemID);
+    query.exec(QString("SELECT title FROM poem WHERE id = %1").arg(poemID));
     query.next();
     QString title = query.value(0).toString();
 
@@ -766,8 +770,8 @@ QString oldStyleHtml(const QSqlDatabase &database, const QString &poemID, const 
     strHtml = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n";
     strHtml += "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n";
     strHtml += "p, span, table {\n";
-    strHtml += "font-size: " + QString::number(size) + "pt;\n";
-    strHtml += "color: " + textColor + ";\n";
+    strHtml += QString("font-size: %1pt;\n").arg(size);
+    strHtml += QString("color: %1;\n").arg(textColor);
     strHtml += "white-space: pre-wrap;\n";
     strHtml += "margin-top: 0px;\n";
     strHtml += "margin-bottom: 0px;\n";
@@ -776,17 +780,17 @@ QString oldStyleHtml(const QSqlDatabase &database, const QString &poemID, const 
     strHtml += "text-indent: 0px;\n";
     strHtml += "}\n";
     strHtml += "a {\n";
-    strHtml += "color: " + textColor + ";\n";
+    strHtml += QString("color: %1;\n").arg(textColor);
     strHtml += "text-decoration: none;\n";
     strHtml += "}\n";
-    strHtml += "." + searchHighlightCssClass + " {\n";
+    strHtml += QString(".%1 {\n").arg(searchHighlightCssClass);
     strHtml += "color: black;\n";
     strHtml += "background-color: yellow;\n";
     strHtml += "}\n";
     strHtml += "</style></head><body>\n";
-    strHtml += "<p align=\"center\" dir=\"rtl\"><a href=\"3-" + poemID + "\"><span style=\"font-size:" + ratioFontSize(size, 1.4) + "pt;font-weight:bold;\">" + title + "</span></a><br /></p>\n";
+    strHtml += QString("<p dir=\"rtl\" align=\"center\"><a href=\"3-%1\"><span style=\"font-size:%2pt;font-weight:bold;\">%3</span></a><br /></p>\n").arg(poemID, ratioFontSize(size, 1.4), title);
 
-    query.exec("SELECT poem_id FROM verse WHERE poem_id = " + poemID);
+    query.exec(QString("SELECT poem_id FROM verse WHERE poem_id = %1").arg(poemID));
 
     int current_row = 0;
     while(query.seek(current_row))
@@ -794,42 +798,45 @@ QString oldStyleHtml(const QSqlDatabase &database, const QString &poemID, const 
         QString vorderMain, posMain, textMain;
         QString vorderNext, posNext, textNext;
         QString hrefMain, hrefNext;
+        QString nameMain, nameNext;
 
-        queryIn.exec("SELECT vorder, position, text FROM verse WHERE poem_id = " + poemID + " AND vorder = " + QString::number(++current_row));
+        queryIn.exec(QString("SELECT vorder, position, text FROM verse WHERE poem_id = %1 AND vorder = %2").arg(poemID).arg(++current_row));
         queryIn.next();
         vorderMain = queryIn.value(0).toString();
         posMain = queryIn.value(1).toString();
-        textMain = queryIn.value(2).toString().trimmed();
+        textMain = "\u200c" + queryIn.value(2).toString().trimmed();
         hrefMain = "3-" + poemID + "-" + vorderMain;
+        nameMain = "n" + vorderMain;
         htmlEntitiesAndNewLine(textMain);
         if(showAllBookmarks && !showBookmark && isBookmarked(database, "3", poemID, vorderMain))
-            bookmarkHighlighter(textMain);
+            bookmarkHighlighter(textMain, bookmarkWithUnderline);
         else if(showBookmark && vorderMain == bookmarkVerseID)
-            bookmarkHighlighter(textMain);
+            bookmarkHighlighter(textMain, bookmarkWithUnderline);
         if(highlight)
             searchHighlighter(textMain, highlightText, searchHighlightCssClass);
 
         if(posMain == "0")
         {
-            queryIn.exec("SELECT vorder, position, text FROM verse WHERE poem_id = " + poemID + " AND vorder = " + QString::number(++current_row));
+            queryIn.exec(QString("SELECT vorder, position, text FROM verse WHERE poem_id = %1 AND vorder = %2").arg(poemID).arg(++current_row));
             if(queryIn.next())
             {
                 vorderNext = queryIn.value(0).toString();
                 posNext = queryIn.value(1).toString();
-                textNext = queryIn.value(2).toString().trimmed();
+                textNext = "\u200c" + queryIn.value(2).toString().trimmed();
                 hrefNext = "3-" + poemID + "-" + vorderNext;
+                nameNext = "n" + vorderNext;
                 htmlEntitiesAndNewLine(textNext);
                 if(showAllBookmarks && !showBookmark && isBookmarked(database, "3", poemID, vorderNext))
-                    bookmarkHighlighter(textNext);
+                    bookmarkHighlighter(textNext, bookmarkWithUnderline);
                 else if(showBookmark && vorderNext == bookmarkVerseID)
-                    bookmarkHighlighter(textNext);
+                    bookmarkHighlighter(textNext, bookmarkWithUnderline);
                 if(highlight)
                     searchHighlighter(textNext, highlightText, searchHighlightCssClass);
             }
         }
         else if(posMain == "2")
         {
-            queryIn.exec("SELECT vorder, position, text FROM verse WHERE poem_id = " + poemID + " AND vorder = " + QString::number(current_row + 1));
+            queryIn.exec(QString("SELECT vorder, position, text FROM verse WHERE poem_id = %1 AND vorder = %2").arg(poemID).arg(current_row + 1));
             if(queryIn.next())
                 posNext = queryIn.value(1).toString();
         }
@@ -844,6 +851,7 @@ QString oldStyleHtml(const QSqlDatabase &database, const QString &poemID, const 
             textNext = textMain;
             textMain = "";
             hrefNext = hrefMain;
+            nameNext = nameMain;
         }
         else if(posMain == "2" && posNext != "3")
         {
@@ -852,29 +860,29 @@ QString oldStyleHtml(const QSqlDatabase &database, const QString &poemID, const 
 
         if(posMain == "0" || posMain == "1")
         {
-            strHtml += "<p align=\"center\" dir=\"rtl\"><a href=\"" + hrefMain + "\">" + lBreakAdder(preBreak) + textMain + "</a></p>\n";
-            strHtml += "<p align=\"center\" dir=\"rtl\"><a href=\"" + hrefNext + "\">" + textNext + "</a></p>\n";
+            strHtml += QString("<p dir=\"rtl\" align=\"center\"><a name=\"%1\" href=\"%2\">%3%4</a></p>\n").arg(nameMain, hrefMain, lBreakAdder(preBreak), textMain);
+            strHtml += QString("<p dir=\"rtl\" align=\"center\"><a name=\"%1\" href=\"%2\">%3</a></p>\n").arg(nameNext, hrefNext, textNext);
             preBreak = false;
         }
         else if(posMain == "-1")
         {
-            strHtml += "<p align=\"justify\" dir=\"rtl\" style=\"margin-left:0.8em;\"><a href=\"" + hrefMain + "\">" + lBreakAdder(preBreak) + textMain + "<br /></a></p>\n";
+            strHtml += QString("<p dir=\"rtl\" align=\"justify\" style=\"margin-left:0.8em;\"><a name=\"%1\" href=\"%2\">%3%4<br /></a></p>\n").arg(nameMain, hrefMain, lBreakAdder(preBreak), textMain);
             preBreak = true;
         }
         else if(posMain == "2")
         {
-            strHtml += "<p align=\"center\" dir=\"rtl\" style=\"font-weight:bold;\"><a href=\"" + hrefMain + "\">" + lBreakAdder(preBreak) + textMain + (pos2Break ? "<br />" : "") + "</a></p>\n";
+            strHtml += QString("<p dir=\"rtl\" align=\"center\" style=\"font-weight:bold;\"><a name=\"%1\" href=\"%2\">%3%4%5</a></p>\n").arg(nameMain, hrefMain, lBreakAdder(preBreak), textMain, (pos2Break ? "<br />" : ""));
             preBreak = pos2Break;
             pos2Break = false;
         }
         else if(posMain == "3")
         {
-            strHtml += "<p align=\"center\" dir=\"rtl\" style=\"font-weight:bold;\"><a href=\"" + hrefMain + "\">" + textMain + "<br /></a></p>\n";
+            strHtml += QString("<p dir=\"rtl\" align=\"center\" style=\"font-weight:bold;\"><a name=\"%1\" href=\"%2\">%3<br /></a></p>\n").arg(nameMain, hrefMain, textMain);
             preBreak = true;
         }
         else if(posMain == "4")
         {
-            strHtml += "<p align=\"right\" dir=\"rtl\"><a href=\"" + hrefMain + "\">" + textMain + "</a></p>\n";
+            strHtml += QString("<p dir=\"rtl\" align=\"right\"><a name=\"%1\" href=\"%2\">%3</a></p>\n").arg(nameMain, hrefMain, textMain);
             preBreak = false;
         }
     }
@@ -883,7 +891,7 @@ QString oldStyleHtml(const QSqlDatabase &database, const QString &poemID, const 
     return strHtml;
 }
 
-QString newStyleHtml(const QSqlDatabase &database, const QString &poemID, const QString &fontSize, bool isDarkMode, const QStringList &highlightText, bool showAllBookmarks, const QString &bookmarkVerseID, int hemistichDistance)
+QString newStyleHtml(const QSqlDatabase &database, const QString &poemID, const QString &fontSize, bool isDarkMode, const QStringList &highlightText, bool showAllBookmarks, const QString &bookmarkVerseID, bool bookmarkWithUnderline, int hemistichDistance)
 {
     QSqlQuery query(database), queryIn(database);
     QString textColor = isDarkMode ? "white" : "black";
@@ -896,7 +904,7 @@ QString newStyleHtml(const QSqlDatabase &database, const QString &poemID, const 
     bool isTableOpen = false;
     QString hemistichDis = QString::number(hemistichDistance / 2);
 
-    query.exec("SELECT title FROM poem WHERE id = " + poemID);
+    query.exec(QString("SELECT title FROM poem WHERE id = %1").arg(poemID));
     query.next();
     QString title = query.value(0).toString();
 
@@ -904,8 +912,8 @@ QString newStyleHtml(const QSqlDatabase &database, const QString &poemID, const 
     strHtml = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n";
     strHtml += "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n";
     strHtml += "p, span, table {\n";
-    strHtml += "font-size: " + QString::number(size) + "pt;\n";
-    strHtml += "color: " + textColor + ";\n";
+    strHtml += QString("font-size: %1pt;\n").arg(size);
+    strHtml += QString("color: %1;\n").arg(textColor);
     strHtml += "white-space: pre-wrap;\n";
     strHtml += "margin-top: 0px;\n";
     strHtml += "margin-bottom: 0px;\n";
@@ -914,17 +922,17 @@ QString newStyleHtml(const QSqlDatabase &database, const QString &poemID, const 
     strHtml += "text-indent: 0px;\n";
     strHtml += "}\n";
     strHtml += "a {\n";
-    strHtml += "color: " + textColor + ";\n";
+    strHtml += QString("color: %1;\n").arg(textColor);
     strHtml += "text-decoration: none;\n";
     strHtml += "}\n";
-    strHtml += "." + searchHighlightCssClass + " {\n";
+    strHtml += QString(".%1 {\n").arg(searchHighlightCssClass);
     strHtml += "color: black;\n";
     strHtml += "background-color: yellow;\n";
     strHtml += "}\n";
     strHtml += "</style></head><body>\n";
-    strHtml += "<p align=\"center\" dir=\"rtl\"><a href=\"3-" + poemID + "\"><span style=\"font-size:" + ratioFontSize(size, 1.4) + "pt;font-weight:bold;\">" + title + "</span></a><br /></p>\n";
+    strHtml += QString("<p dir=\"rtl\" align=\"center\"><a href=\"3-%1\"><span style=\"font-size:%2pt;font-weight:bold;\">%3</span></a><br /></p>\n").arg(poemID, ratioFontSize(size, 1.4), title);
 
-    query.exec("SELECT poem_id FROM verse WHERE poem_id = " + poemID);
+    query.exec(QString("SELECT poem_id FROM verse WHERE poem_id = %1").arg(poemID));
 
     int current_row = 0;
     while(query.seek(current_row))
@@ -932,42 +940,45 @@ QString newStyleHtml(const QSqlDatabase &database, const QString &poemID, const 
         QString vorderMain, posMain, textMain;
         QString vorderNext, posNext, textNext;
         QString hrefMain, hrefNext;
+        QString nameMain, nameNext;
 
-        queryIn.exec("SELECT vorder, position, text FROM verse WHERE poem_id = " + poemID + " AND vorder = " + QString::number(++current_row));
+        queryIn.exec(QString("SELECT vorder, position, text FROM verse WHERE poem_id = %1 AND vorder = %2").arg(poemID).arg(++current_row));
         queryIn.next();
         vorderMain = queryIn.value(0).toString();
         posMain = queryIn.value(1).toString();
-        textMain = queryIn.value(2).toString().trimmed();
+        textMain = "\u200c" + queryIn.value(2).toString().trimmed();
         hrefMain = "3-" + poemID + "-" + vorderMain;
+        nameMain = "n" + vorderMain;
         htmlEntitiesAndNewLine(textMain);
         if(showAllBookmarks && !showBookmark && isBookmarked(database, "3", poemID, vorderMain))
-            bookmarkHighlighter(textMain);
+            bookmarkHighlighter(textMain, bookmarkWithUnderline);
         else if(showBookmark && vorderMain == bookmarkVerseID)
-            bookmarkHighlighter(textMain);
+            bookmarkHighlighter(textMain, bookmarkWithUnderline);
         if(highlight)
             searchHighlighter(textMain, highlightText, searchHighlightCssClass);
 
         if(posMain == "0")
         {
-            queryIn.exec("SELECT vorder, position, text FROM verse WHERE poem_id = " + poemID + " AND vorder = " + QString::number(++current_row));
+            queryIn.exec(QString("SELECT vorder, position, text FROM verse WHERE poem_id = %1 AND vorder = %2").arg(poemID).arg(++current_row));
             if(queryIn.next())
             {
                 vorderNext = queryIn.value(0).toString();
                 posNext = queryIn.value(1).toString();
-                textNext = queryIn.value(2).toString().trimmed();
+                textNext = "\u200c" + queryIn.value(2).toString().trimmed();
                 hrefNext = "3-" + poemID + "-" + vorderNext;
+                nameNext = "n" + vorderNext;
                 htmlEntitiesAndNewLine(textNext);
                 if(showAllBookmarks && !showBookmark && isBookmarked(database, "3", poemID, vorderNext))
-                    bookmarkHighlighter(textNext);
+                    bookmarkHighlighter(textNext, bookmarkWithUnderline);
                 else if(showBookmark && vorderNext == bookmarkVerseID)
-                    bookmarkHighlighter(textNext);
+                    bookmarkHighlighter(textNext, bookmarkWithUnderline);
                 if(highlight)
                     searchHighlighter(textNext, highlightText, searchHighlightCssClass);
             }
         }
         else if(posMain == "2")
         {
-            queryIn.exec("SELECT vorder, position, text FROM verse WHERE poem_id = " + poemID + " AND vorder = " + QString::number(current_row + 1));
+            queryIn.exec(QString("SELECT vorder, position, text FROM verse WHERE poem_id = %1 AND vorder = %2").arg(poemID).arg(current_row + 1));
             if(queryIn.next())
                 posNext = queryIn.value(1).toString();
         }
@@ -982,6 +993,7 @@ QString newStyleHtml(const QSqlDatabase &database, const QString &poemID, const 
             textNext = textMain;
             textMain = "";
             hrefNext = hrefMain;
+            nameNext = nameMain;
         }
         else if(posMain == "2" && posNext != "3")
         {
@@ -991,31 +1003,31 @@ QString newStyleHtml(const QSqlDatabase &database, const QString &poemID, const 
         if(posMain == "0" || posMain == "1")
         {
             strHtml += openTable(isTableOpen) + "<tr>\n";
-            strHtml += "<td width=\"50%\" align=\"right\" dir=\"rtl\" style=\"padding-right:" + hemistichDis + "px;\"><a href=\"" + hrefNext + "\">" + textNext + "</a></td>\n";
+            strHtml += QString("<td width=\"50%\" dir=\"rtl\" align=\"right\" style=\"padding-right:%1px;\"><a name=\"%2\" href=\"%3\">%4</a></td>\n").arg(hemistichDis, nameNext, hrefNext, textNext);
             strHtml += "<td width=\"0%\">\u200c\u200c\u200c\u200c\u200c</td>\n";
-            strHtml += "<td width=\"50%\" align=\"left\" dir=\"rtl\" style=\"padding-left:" + hemistichDis + "px;\"><a href=\"" + hrefMain + "\">" + textMain + "</a></td>\n";
+            strHtml += QString("<td width=\"50%\" dir=\"rtl\" align=\"left\" style=\"padding-left:%1px;\"><a name=\"%2\" href=\"%3\">%4</a></td>\n").arg(hemistichDis, nameMain, hrefMain, textMain);
             strHtml += "</tr>\n";
             preBreak = false;
         }
         else if(posMain == "-1")
         {
-            strHtml += closeTable(isTableOpen) + "<p align=\"justify\" dir=\"rtl\" style=\"margin-left:0.8em;\"><a href=\"" + hrefMain + "\">" + lBreakAdder(preBreak) + textMain + "<br /></a></p>\n";
+            strHtml += QString("%1<p dir=\"rtl\" align=\"justify\" style=\"margin-left:0.8em;\"><a name=\"%2\" href=\"%3\">%4%5<br /></a></p>\n").arg(closeTable(isTableOpen), nameMain, hrefMain, lBreakAdder(preBreak), textMain);
             preBreak = true;
         }
         else if(posMain == "2")
         {
-            strHtml += closeTable(isTableOpen) + "<p align=\"center\" dir=\"rtl\" style=\"font-weight:bold;\"><a href=\"" + hrefMain + "\">" + lBreakAdder(preBreak) + textMain + (pos2Break ? "<br />" : "") + "</a></p>\n";
+            strHtml += QString("%1<p dir=\"rtl\" align=\"center\" style=\"font-weight:bold;\"><a name=\"%2\" href=\"%3\">%4%5%6</a></p>\n").arg(closeTable(isTableOpen), nameMain, hrefMain, lBreakAdder(preBreak), textMain, (pos2Break ? "<br />" : ""));
             preBreak = pos2Break;
             pos2Break = false;
         }
         else if(posMain == "3")
         {
-            strHtml += closeTable(isTableOpen) + "<p align=\"center\" dir=\"rtl\" style=\"font-weight:bold;\"><a href=\"" + hrefMain + "\">" + textMain + "<br /></a></p>\n";
+            strHtml += QString("%1<p dir=\"rtl\" align=\"center\" style=\"font-weight:bold;\"><a name=\"%2\" href=\"%3\">%4<br /></a></p>\n").arg(closeTable(isTableOpen), nameMain, hrefMain, textMain);
             preBreak = true;
         }
         else if(posMain == "4")
         {
-            strHtml += closeTable(isTableOpen) + "<p align=\"right\" dir=\"rtl\"><a href=\"" + hrefMain + "\">" + textMain + "</a></p>\n";
+            strHtml += QString("%1<p dir=\"rtl\" align=\"right\"><a name=\"%2\" href=\"%3\">%4</a></p>\n").arg(closeTable(isTableOpen), nameMain, hrefMain, textMain);
             preBreak = false;
         }
     }
@@ -1065,9 +1077,12 @@ inline QString lBreakAdder(bool preBreak)
     return "<br />";
 }
 
-inline void bookmarkHighlighter(QString &str)
+inline void bookmarkHighlighter(QString &str, bool bookmarkWithUnderline)
 {
-    str = "<u><b>" + str + "</b></u>";
+    if(bookmarkWithUnderline)
+        str = "<u><b>" + str + "</b></u>";
+    else
+        str = "<b>" + str + "</b>";
 }
 
 void searchHighlighter(QString &text, const QStringList &list, const QString &cssClass)
@@ -1272,7 +1287,7 @@ bool exportBookmarks(const QSqlDatabase &mainDatabase, QSqlDatabase &newDatabase
 
 QString randString(int len)
 {
-    return QUuid::createUuid().toString().remove(QRegularExpression("\\{|\\}|\\-")).left(len).toUpper();
+    return QUuid::createUuid().toString().remove(QRegularExpression("[^A-Za-z0-9]")).left(len).toUpper();
 }
 
 QString createDBDialog(QWidget *parent, const QString &defaultFilePath)
@@ -1285,10 +1300,10 @@ QString createDBDialog(QWidget *parent, const QString &defaultFilePath)
         QFileInfo dir(file.path());
         if(dir.isWritable())
         {
-            if(QFile::exists(file_path) && !isStdGanjoorDB(file_path))
+            if(QFileInfo(file_path).isFile() && !isStdGanjoorDB(file_path))
                 QFile::remove(file_path);
 
-            if(!QFile::exists(file_path) || !isStdGanjoorDB(file_path))
+            if(!QFileInfo(file_path).isFile() || !isStdGanjoorDB(file_path))
                 createGanjoorTable(file_path);
 
             return file_path;
@@ -1399,24 +1414,24 @@ QMessageBox::StandardButton messageBox(const QString &title, const QString &text
     return QMessageBox::NoButton;
 }
 
-QString byteToHuman(qint64 size)
+QString byteToHuman(qint64 size, bool persian, bool abbr, const QString &sep)
 {
     int base = 1024;
 
     if(size < base)
-        return QString::number(size) + " بایت";
+        return QString::number(size) + sep + (persian ? "بایت" : (abbr ? "B" : "Bytes"));
     else if(size < pow(base, 2))
-        return QString::number(size / base) + " کیلوبایت";
+        return QString::number(size / base) + sep + (persian ? "کیلوبایت" : (abbr ? "KB" : "Kilobytes"));
     else if(size < pow(base, 3))
-        return QString::number((float)size / pow(base, 2), 'f', 2) + " مگابایت";
+        return QString::number((float)size / pow(base, 2), 'f', 2) + sep + (persian ? "مگابایت" : (abbr ? "MB" : "Megabytes"));
     else if(size < pow(base, 4))
-        return QString::number((float)size / pow(base, 3), 'f', 2) + " گیگابایت";
+        return QString::number((float)size / pow(base, 3), 'f', 2) + sep + (persian ? "گیگابایت" : (abbr ? "GB" : "Gigabytes"));
     else if(size < pow(base, 5))
-        return QString::number((float)size / pow(base, 4), 'f', 2) + " ترابایت";
+        return QString::number((float)size / pow(base, 4), 'f', 2) + sep + (persian ? "ترابایت" : (abbr ? "TB" : "Terabytes"));
     else if(size < pow(base, 6))
-        return QString::number((float)size / pow(base, 5), 'f', 2) + " پتابایت";
+        return QString::number((float)size / pow(base, 5), 'f', 2) + sep + (persian ? "پتابایت" : (abbr ? "PB" : "Petabytes"));
 
-    return QString::number((float)size / pow(base, 6), 'f', 2) + " اگزابایت";
+    return QString::number((float)size / pow(base, 6), 'f', 2) + sep + (persian ? "اگزابایت" : (abbr ? "EB" : "Exabytes"));
 }
 
 QString ratioFontSize(double size, double ratio)
@@ -1442,28 +1457,205 @@ QString appStyleSheet(const QString &appFN, const QString &appFS, const QString 
 
 bool dbExtCheck(const QString &filePath)
 {
-    QString file_path = filePath.toLower();
-    if(file_path.endsWith(".gdb") ||
-       file_path.endsWith(".s3db") ||
-       file_path.endsWith(".db") ||
-       file_path.endsWith(".sqlite") ||
-       file_path.endsWith(".sqlite3"))
+    if(filePath.endsWith(".gdb", Qt::CaseInsensitive) ||
+       filePath.endsWith(".s3db", Qt::CaseInsensitive) ||
+       filePath.endsWith(".db", Qt::CaseInsensitive) ||
+       filePath.endsWith(".sqlite", Qt::CaseInsensitive) ||
+       filePath.endsWith(".sqlite3", Qt::CaseInsensitive))
         return true;
-
     return false;
 }
 
 bool removeTempDir(const QString &dirName)
 {
-    QDir qDir(QDir::tempPath() + "/" + dirName);
-    return qDir.removeRecursively();
+    QDir dir(QDir::tempPath() + "/" + dirName);
+    return dir.removeRecursively();
+}
+
+void argumentParser(int argc, char *argv[])
+{
+    if(argc > 1)
+    {
+        QString arg2(argv[1]);
+        QString str;
+        if(arg2 == "--version")
+        {
+            str  = QString("%1 version %2\n").arg(Constants::Ghazal, Constants::GhazalVersion);
+            str += QString("Publisher: %1\n").arg(Constants::Rosybit);
+            str += QString("URL: %1\n").arg(Constants::RosybitUrl);
+            str += QString("%1: %2\n").arg(Constants::Ghazal, Constants::GhazalUrl);
+            str += QString("License: %1\n").arg(Constants::GhazalLicense);
+            str += QString("\nWritten by %1.").arg(Constants::Programmer);
+            qDebug().noquote() << str;
+            exit(0);
+        }
+        else if(arg2 == "--help")
+        {
+            str  = QString("Usage: %1 [OPTION] [DIR]\n").arg(appNameOS());
+            str += QString("\nExamples:\n");
+            str += QString("  %1 --data-dir=\"./data\"\n").arg(appNameOS());
+            str += QString("  %1 -d \"./data\"\n").arg(appNameOS());
+            str += QString("\nOptions:\n");
+            str += QString("  -d, --data-dir=DIR  change data dir to DIR\n");
+            str += QString("      --help          display this help and exit\n");
+            str += QString("      --version       output version information and exit");
+            qDebug().noquote() << str;
+            exit(0);
+        }
+        else
+        {
+            if(!argDataDir(argc, argv))
+                qDebug().noquote() << QString("%1: invalid option\nTry '%1 --help' for more information.").arg(appNameOS());
+        }
+    }
+}
+
+bool argDataDir(int argc, char *argv[])
+{
+    QString dataPath;
+
+    if(argc > 1)
+    {
+        QRegularExpression regex1("\\-\\-data\\-dir=(.+)");  // --data-dir=(.+)
+        QRegularExpression regex2("\\-d(.+)");               // -d(.+)
+        QRegularExpressionMatch match;
+        for(int i = 1; i < argc; i++)
+        {
+            match = regex1.match(QString(argv[i]));
+            if(match.hasMatch())
+            {
+                dataPath = QDir::fromNativeSeparators(match.captured(1).trimmed());
+                break;
+            }
+
+            match = regex2.match(QString(argv[i]));
+            if(match.hasMatch())
+            {
+                dataPath = QDir::fromNativeSeparators(match.captured(1).trimmed());
+                break;
+            }
+
+            if(QString(argv[i]) == "-d" && i + 1 < argc)
+            {
+                dataPath = QDir::fromNativeSeparators(QString(argv[i + 1]).trimmed());
+                break;
+            }
+        }
+    }
+
+    return setDataDir(dataPath, argc, argv);
+}
+
+bool setDataDir(const QString &dataPath, int argc, char *argv[])
+{
+    QString appDirPath = argc ? QFileInfo(argv[0]).absolutePath() : applicationDirPath();
+    QString confFilePath = appDirPath + "/" + Constants::GhazalConfFileName;
+    QString comment = QString("\n# Path separator for %1 in all operating systems is \"/\" (Slash). Don't use \"\\\" (Backslash).\n").arg(Constants::Ghazal);
+    QString preDataDir = dataDir(appDirPath);
+
+    if(!dataPath.isEmpty())
+    {
+        QFile::remove(confFilePath);
+        QSettings settings(confFilePath, QSettings::IniFormat);
+        settings.setValue(QString("Paths/%1Data").arg(Constants::Ghazal), dataPath);
+    }
+
+    if(!dataPath.isEmpty() && QFileInfo(confFilePath).isFile() && QDir().mkpath(dataPath))
+    {
+        QString settingsFilePath = preDataDir + "/" + Constants::SettingsFileName;
+        if(QFileInfo(settingsFilePath).isFile())
+            QFile::rename(settingsFilePath, dataPath + "/" + Constants::SettingsFileName);
+
+        QString historyFilePath = preDataDir + "/" + Constants::HistoryFileName;
+        if(QFileInfo(historyFilePath).isFile())
+            QFile::rename(historyFilePath, dataPath + "/" + Constants::HistoryFileName);
+    }
+
+    if(!dataPath.isEmpty())
+    {
+        writeTextToFile(confFilePath, comment);
+        fileEOLConverter(confFilePath);
+    }
+
+    return !dataPath.isEmpty();
+}
+
+bool setDataDir(const QString &dataPath)
+{
+    return setDataDir(dataPath, 0, nullptr);
+}
+
+void writeTextToFile(const QString &filePath, const QString &text, bool append)
+{
+    QFile file(filePath);
+    QTextStream out;
+    if(append)
+        file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append);
+    else
+        file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate);
+    out.setDevice(&file);
+#if QT_VERSION >= 0x060000
+    out.setEncoding(QStringConverter::Utf8);
+#else
+    out.setCodec(QTextCodec::codecForName("UTF-8"));
+#endif
+    out << text;
+    file.close();
+}
+
+void fileEOLConverter(const QString &filePath, const QString &eol)
+{
+    QFile file(filePath);
+    QByteArray byteArray;
+
+    file.open(QIODevice::ReadOnly);
+    byteArray = file.readAll();
+    file.close();
+
+    if(eol == "\r")
+    {
+        byteArray.replace("\r\n", "\r");
+        byteArray.replace("\n", "\r");
+    }
+    else if(eol == "\r\n")
+    {
+        byteArray.replace("\r\n", "\n");
+        byteArray.replace("\r", "\n");
+        byteArray.replace("\n", "\r\n");
+    }
+    else
+    {
+        byteArray.replace("\r\n", "\n");
+        byteArray.replace("\r", "\n");
+    }
+
+    file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+    file.write(byteArray);
+    file.close();
+}
+
+QString applicationDirPath()
+{
+    // qDebug().noquote() << QProcessEnvironment::systemEnvironment().value(QStringLiteral("APPIMAGE"));  // AppImage Path
+    // qDebug().noquote() << qgetenv("APPIMAGE");  // AppImage Path
+    // path = QDir::currentPath();  // Don't use this if you are open .app bundle (macOS).
+
+    QString path = QCoreApplication::applicationDirPath();  // Don't use this if you are inside an AppImage package (Linux) or an application object has not been created yet.
+#if !defined Q_OS_WIN && !defined Q_OS_MACOS
+    QString appImagePath(qgetenv("APPIMAGE"));
+    if(!appImagePath.isEmpty())
+        path = QFileInfo(appImagePath).absolutePath();
+#endif
+    return path;
 }
 
 QString rosybitDir()
 {
     QString str;
-#ifdef Q_OS_WIN
+#if defined Q_OS_WIN
     str = QDir::fromNativeSeparators(qgetenv("APPDATA")) + "/" + Constants::Rosybit;
+#elif defined Q_OS_MACOS
+    str = QDir::fromNativeSeparators(qgetenv("HOME")) + "/.config/" + Constants::Rosybit;
 #else
     str = QDir::fromNativeSeparators(qgetenv("HOME")) + "/.config/" + Constants::Rosybit.toLower();
 #endif
@@ -1473,51 +1665,124 @@ QString rosybitDir()
 QString appNameOS()
 {
     QString appName;
-#ifdef Q_OS_WIN
-    appName = Constants::AppName;
+#if defined Q_OS_WIN || defined Q_OS_MACOS
+    appName = Constants::Ghazal;
 #else
-    appName = Constants::AppName.toLower();
+    appName = Constants::Ghazal.toLower();
 #endif
     return appName;
+}
+
+QString dataDir(const QString &appDirPath)
+{
+    QString confFilePath = appDirPath + "/" + Constants::GhazalConfFileName;
+    QString dDir = rosybitDir() + "/" + appNameOS();
+
+    // QFileInfo("/home/foo/bar").isFile()    If "bar" doesn't exist            -> return: false
+    // QFileInfo("/home/foo/bar").isFile()    If "bar" exists and it is a dir   -> return: false
+    // QFileInfo("/home/foo/bar").isFile()    If "bar" exists and it is a file  -> return: true
+    // QFile::exists("/home/foo/bar")         If "bar" doesn't exist            -> return: false
+    // QFile::exists("/home/foo/bar")         If "bar" exists and it is a dir   -> return: true
+    // QFile::exists("/home/foo/bar")         If "bar" exists and it is a file  -> return: true
+
+    if(QFileInfo(confFilePath).isFile())
+    {
+        QSettings confFile(confFilePath, QSettings::IniFormat);
+        QString tdDirStr = confFile.value(QString("Paths/%1Data").arg(Constants::Ghazal)).toString().trimmed();
+        if(!tdDirStr.isEmpty())
+            dDir = absolutePath(tdDirStr);
+    }
+
+    return dDir;
+}
+
+QString dataDir()
+{
+    return dataDir(applicationDirPath());
 }
 
 QString defaultDBPath()
 {
     QStringList dbPath;
 
-    // qDebug().noquote() << QProcessEnvironment::systemEnvironment().value(QStringLiteral("APPIMAGE"));  // AppImage Path
-    // qDebug().noquote() << qgetenv("APPIMAGE");  // AppImage Path
-
-    // dbPath << QCoreApplication::applicationDirPath() + "/" + Constants::DefaultDBName;  // This is not work if you are inside an AppImage package.
-    dbPath << QDir::currentPath() + "/" + Constants::DefaultDBName;
-#ifdef Q_OS_WIN
-    dbPath << rosybitDir() + "/" + Constants::AppName + "/" + Constants::DefaultDBName;
-#endif
-    dbPath << QDir::homePath() + "/" + Constants::AppName + "/" + Constants::DefaultDBName;
+    dbPath << applicationDirPath() + "/" + Constants::DefaultDBName;
+    dbPath << applicationDirPath() + "/database/" + Constants::DefaultDBName;
+    dbPath << applicationDirPath() + "/databases/" + Constants::DefaultDBName;
+    dbPath << applicationDirPath() + "/data/" + Constants::DefaultDBName;
+    dbPath << dataDir() + "/" + Constants::DefaultDBName;
+    dbPath << rosybitDir() + "/" + appNameOS() + "/" + Constants::DefaultDBName;
+    dbPath << QDir::homePath() + "/" + Constants::Ghazal + "/" + Constants::DefaultDBName;
     dbPath << QDir::homePath() + "/" + Constants::DefaultDBName;
 #ifdef Q_OS_WIN
     dbPath << QDir::fromNativeSeparators(qgetenv("LOCALAPPDATA")) + "/ganjoor/" + Constants::DefaultDBName;
 #endif
 
     for(int i = 0; i < dbPath.count(); i++)
-        if(QFile::exists(dbPath[i]) && isStdGanjoorDB(dbPath[i]))
+        if(QFileInfo(dbPath[i]).isFile() && isStdGanjoorDB(dbPath[i]))
             return dbPath[i];
     return QString();
 }
 
-void showFileInDir(const QString &filePath)
+QString absolutePath(const QString &path)
 {
-#if defined Q_OS_WIN
-    QProcess::startDetached("explorer.exe", {"/select,", QDir::toNativeSeparators(filePath)});
-#elif defined Q_OS_MACOS
-    QProcess::execute("/usr/bin/osascript", {"-e", "tell application \"Finder\" to reveal POSIX file \"" + filePath + "\""});
-    QProcess::execute("/usr/bin/osascript", {"-e", "tell application \"Finder\" to activate"});
+    // Both QDir(path).absolutePath() and QFileInfo(path).absoluteFilePath() functions return the same value, but
+    // if the last character in "path" is the slash (/), function QDir(path).absolutePath() will remove it, but
+    // function QFileInfo(path).absoluteFilePath() will not remove it.
+    // QDir("/home////foo//bar///").absolutePath()                                    -> return: /home/foo/bar
+    // QFileInfo("/home////foo//bar///").absoluteFilePath()                           -> return: /home/foo/bar/
+    // QFileInfo(QDir("/home////foo//bar///").absolutePath()).absolutePath()          -> return: /home/foo
+    // QFileInfo(QFileInfo("/home////foo//bar///").absoluteFilePath()).absolutePath() -> return: /home/foo/bar
+
+    /*
+       macOS:
+         Both QDir(path).absolutePath() and QFileInfo(path).absoluteFilePath() functions are not work
+         correctly if you are open .app bundle. Both of these functions return the "./" as "/" (root).
+    */
+
+#ifdef Q_OS_MACOS
+    QString newPath(path);
+    if(QDir(newPath).isRelative())
+    {
+        newPath.remove(QRegularExpression("^\\.\\/+"));
+        newPath = applicationDirPath() + "/" + newPath;
+    }
+    return QDir(newPath).absolutePath();
 #else
-    QDesktopServices::openUrl(QUrl(QFileInfo(filePath).path()));
+    return QDir(path).absolutePath();
 #endif
 }
 
-QString gregorianToPersian(int day, int month, int year, const QString &delimiter, bool dd, bool mm)
+QString createRelativePathIfPossible(const QString &path, FileDirType fileDirType, const QString &rootDir)
+{
+    if(path.isEmpty())
+        return QString();
+
+    QString newPath(absolutePath(path));
+    QString rDir(absolutePath(rootDir));
+    QString uDir;
+
+    if(fileDirType == FileDirType::File)
+        uDir = QFileInfo(newPath).absolutePath();
+    else if(fileDirType == FileDirType::Dir)
+        uDir = newPath;
+
+    if(rDir.right(1) == "/")  // Root Path in Linux (/), Root Drive Path in Windows (D:/)
+        rDir = rDir.left(rDir.size() - 1);
+    if(uDir.right(1) == "/")  // Root Path in Linux (/), Root Drive Path in Windows (D:/)
+        uDir = uDir.left(uDir.size() - 1);
+
+    if(rDir == uDir || rDir + "/" == uDir.left(rDir.size() + 1))
+    {
+        newPath.remove(0, rDir.size());
+        if(!newPath.isEmpty() && newPath.left(1) == "/")
+            newPath.remove(0, 1);
+        return (newPath.isEmpty() && fileDirType == FileDirType::Dir) ? "." : "./" + newPath;
+    }
+
+    return newPath;
+}
+
+QString gregorianToPersian(int day, int month, int year, const QString &delimiter, bool dd, bool MM)
 {
     int _d = day, _m = month, _y = year;
     gregorian_persian(&_d, &_m, &_y);
@@ -1527,16 +1792,16 @@ QString gregorianToPersian(int day, int month, int year, const QString &delimite
 
     if(dd && _d < 10)
         d = "0" + d;
-    if(mm && _m < 10)
+    if(MM && _m < 10)
         m = "0" + m;
 
     return QString("%1%2%3%4%5").arg(_y).arg(delimiter).arg(m).arg(delimiter).arg(d);
 }
 
-QString nowDate(const QString &delimiter, bool dd, bool mm)
+QString nowDate(const QString &delimiter, bool dd, bool MM)
 {
     QDate date(QDate::currentDate());
-    return gregorianToPersian(date.day(), date.month(), date.year(), delimiter, dd, mm);
+    return gregorianToPersian(date.day(), date.month(), date.year(), delimiter, dd, MM);
 }
 
 QString nowTime(const QString &delimiter)
@@ -1553,6 +1818,8 @@ QString correctHtmlTableText(const QString &text)
 //    while((pos = regex.indexIn(str, pos)) != -1)
 //        str.replace(pos, regex.cap(0).size(), regex.cap(2) + "\n" + regex.cap(1) + "\n");
 //    str.replace(QRegExp("\\n{3,}"), "\n\n");
+//    str.replace(QRegExp("\\n\u200c+"), "\n");
+//    str.remove(QRegExp("^\u200c+"));  // If only one record is selected.
 //    str = str.trimmed();
 
     QRegularExpression regex("([^\\n]*)\\n\u200c\u200c\u200c\u200c\u200c\\n([^\\n]*)");
@@ -1563,14 +1830,15 @@ QString correctHtmlTableText(const QString &text)
         match = regex.match(str);
     }
     str.replace(QRegularExpression("\\n{3,}"), "\n\n");
+    str.remove(QRegularExpression("^\u200c+", QRegularExpression::MultilineOption));
     str = str.trimmed();
 
     return str;
 }
 
-QString persianNumber(int n)
+QString persianNumber(const QString &n, bool convertDecimalSeparator)
 {
-    QString number(QString::number(n));
+    QString number(n);
     number.replace("0", "۰");
     number.replace("1", "۱");
     number.replace("2", "۲");
@@ -1581,7 +1849,67 @@ QString persianNumber(int n)
     number.replace("7", "۷");
     number.replace("8", "۸");
     number.replace("9", "۹");
+    if(convertDecimalSeparator)
+        number.replace(".", "٫");
     return number;
+}
+
+QString persianNumber(int n, bool convertDecimalSeparator)
+{
+    return persianNumber(QString::number(n), convertDecimalSeparator);
+}
+
+void showFileInDir(const QString &filePath)
+{
+#if defined Q_OS_WIN
+    QProcess::startDetached("explorer.exe", {"/select,", QDir::toNativeSeparators(filePath)});
+#elif defined Q_OS_MACOS
+    QProcess::execute("/usr/bin/osascript", {"-e", "tell application \"Finder\" to reveal POSIX file \"" + filePath + "\""});
+    QProcess::execute("/usr/bin/osascript", {"-e", "tell application \"Finder\" to activate"});
+#else
+    QDesktopServices::openUrl(QUrl(QFileInfo(filePath).path()));
+#endif
+}
+
+int versionCompare(const QString &v1, const QString &v2)
+{
+    QStringList list1(v1.split(".")), list2(v2.split("."));
+    int c = list1.count() > list2.count() ? list1.count() : list2.count();
+    for(int i = 0; i < c; i++)
+    {
+        int n1 = list1.count() > i ? list1[i].toInt() : 0;
+        int n2 = list2.count() > i ? list2[i].toInt() : 0;
+        if(n1 > n2)
+            return 1;
+        else if(n1 < n2)
+            return -1;
+    }
+    return 0;
+}
+
+double calculateScreenRatio()
+{
+    QSize s_size(QGuiApplication::primaryScreen()->size());
+    double x, y, result;
+    x = (double)s_size.width() / 1366;
+    y = (double)s_size.height() / 768;
+    result = x > y ? y : x;
+    return result > 1 ? result : 1;
+}
+
+bool isHost64Bit()
+{
+    return QSysInfo::currentCpuArchitecture().contains("64");
+}
+
+bool isBuild64Bit()
+{
+    return QSysInfo::buildCpuArchitecture().contains("64");
+}
+
+bool is32BuildOn64Host()
+{
+    return !isBuild64Bit() && isHost64Bit();
 }
 
 bool idComp(const QString &id1, const QString &id2)

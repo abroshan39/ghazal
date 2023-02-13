@@ -38,6 +38,12 @@ QStyle *LightStyle::styleBase(QStyle *style) const
 
 QStyle *LightStyle::baseStyle() const {return styleBase();}
 
+void LightStyle::polish(QPalette &palette)
+{
+    // fix a minor bug
+    palette.setColor(QPalette::Link, Qt::blue);
+}
+
 void LightStyle::polish(QApplication *app)
 {
     if(!app) return;
@@ -76,7 +82,7 @@ void DarkStyle::polish(QPalette &palette)
     palette.setColor(QPalette::ButtonText, Qt::white);
     palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(127, 127, 127));
     palette.setColor(QPalette::BrightText, Qt::red);
-    palette.setColor(QPalette::Link, QColor(42, 130, 218));
+    palette.setColor(QPalette::Link, QColor(59, 120, 255));
     palette.setColor(QPalette::Highlight, QColor(42, 130, 218));
     palette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(80, 80, 80));
     palette.setColor(QPalette::HighlightedText, Qt::white);

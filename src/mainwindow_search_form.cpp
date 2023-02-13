@@ -3,7 +3,6 @@
     Publisher: Rosybit
     Url: http://www.rosybit.com
     GitHub: https://github.com/abroshan39/ghazal
-    Version: 1.4
     Author: Aboutaleb Roshan [ab.roshan39@gmail.com]
     License: MIT License
 */
@@ -19,33 +18,41 @@ void MainWindow::on_btnAdvancedSearch_clicked()
     if(!searchAction->isChecked())
         ui->btnSearchForm->toggled(true);
 
-    SearchForm *searchForm = new SearchForm(&appSettings, this);
-    connect(searchForm, &SearchForm::sigSearch, this, &MainWindow::slotSearch);
-    connect(searchForm, &SearchForm::sigSearchTableChanged, this, &MainWindow::slotSearchTableChanged);
-    searchForm->show();
+    if(!appSettings.searchSettings.isSearching)
+    {
+        SearchForm *searchForm = new SearchForm(&appSettings, this);
+        connect(searchForm, &SearchForm::sigSearch, this, &MainWindow::slotSearch);
+        connect(searchForm, &SearchForm::sigSearchTableChanged, this, &MainWindow::slotSearchTableChanged);
+        searchForm->show();
+    }
 }
 
 void MainWindow::slotSearch()
 {
-    ui->lineEditSearch->setText(appSettings.ss.searchPhrase);
+    ui->lineEditSearch->setText(appSettings.searchSettings.searchPhrase);
     on_btnSearch_clicked();
 }
 
 void MainWindow::on_btnSearch_clicked()
 {
-    if(appSettings.ss.isSearching)
+    if(appSettings.searchSettings.isSearching)
     {
-        appSettings.ss.searchState = false;
+        appSettings.inSearchSettings->isSearching = false;  // inSearchSettings.isSearching = false;
         return;
     }
 
-    appSettings.ss.isSearching = true;
-    appSettings.ss.searchPhrase = ui->lineEditSearch->text();
-    QString strQuery = searchStrQuery(appSettings.mainDB, appSettings.ss.searchPhrase, appSettings.ss.allItemsSelected, appSettings.ss.poetID, appSettings.ss.table, appSettings.ss.skipDiacritics, appSettings.ss.skipCharTypes);
+    appSettings.searchSettings.isSearching = true;
+    appSettings.searchSettings.searchPhrase = ui->lineEditSearch->text();
 
-    qDebug().noquote() << strQuery;
+    QString strQuery = searchStrQuery(appSettings.mainDB, appSettings.searchSettings.method, appSettings.searchSettings.searchPhrase, appSettings.searchSettings.allItemsSelected, appSettings.searchSettings.poetIDList, appSettings.searchSettings.table, appSettings.searchSettings.skipDiacritics, appSettings.searchSettings.skipCharTypes);
 
-    Worker *worker = new Worker(Worker::Searcher, &appSettings, ui->tableWidget, strQuery);
+    modelSearch = new QStandardItemModel;
+    if(appSettings.searchSettings.showItemsDuringSearch)
+        setTableViewModel(modelSearch);
+    else
+        setTableViewModel(new QStandardItemModel);  // Clear previous results
+
+    Worker *worker = new Worker(Worker::Searcher, &appSettings, modelSearch, strQuery);
     QThread *thread = new QThread;
     worker->moveToThread(thread);
 
@@ -79,7 +86,10 @@ void MainWindow::threadFinished(Worker::WorkerType type, QVariant result)
         ui->lineEditSearch->setReadOnly(false);
         ui->progressBarSearch->hide();
 
-        appSettings.ss.isSearching = false;
+        appSettings.searchSettings.isSearching = false;
+
+        if(!appSettings.searchSettings.showItemsDuringSearch)
+            setTableViewModel(modelSearch);
 
         if(!result.toString().isEmpty())
             messageBox("گزارش", result.toString(), Information, this);
@@ -89,33 +99,32 @@ void MainWindow::threadFinished(Worker::WorkerType type, QVariant result)
 void MainWindow::createHistorySearch()
 {
     {   // History Block
-        if(appSettings.ss.table == VerseTable)
+        if(appSettings.searchSettings.table == VerseTable)
             searchHistory.table = "verse";
-        else if(appSettings.ss.table == PoemTable)
+        else if(appSettings.searchSettings.table == PoemTable)
             searchHistory.table = "poem";
-        else if(appSettings.ss.table == CatTable)
+        else if(appSettings.searchSettings.table == CatTable)
             searchHistory.table = "cat";
 
-        searchHistory.poetID.clear();
-        if(appSettings.ss.allItemsSelected)
+        searchHistory.poetIDList.clear();
+        if(appSettings.searchSettings.allItemsSelected)
         {
             QSqlQuery query("SELECT id FROM poet ORDER BY id");
             while(query.next())
-                searchHistory.poetID << query.value(0).toString();
+                searchHistory.poetIDList << query.value(0).toString();
         }
         else
         {
-            searchHistory.poetID = appSettings.ss.poetID;
-            std::sort(searchHistory.poetID.begin(), searchHistory.poetID.end(), idComp);
+            searchHistory.poetIDList = appSettings.searchSettings.poetIDList;
         }
 
-        searchHistory.allItemsSelected = appSettings.ss.allItemsSelected;
+        searchHistory.allItemsSelected = appSettings.searchSettings.allItemsSelected;
         searchHistory.date = nowDate();
         searchHistory.time = nowTime();
-        searchHistory.skipDiacritics = appSettings.ss.skipDiacritics;
-        searchHistory.skipCharTypes = appSettings.ss.skipCharTypes;
-        searchHistory.searchPhrase = appSettings.ss.searchPhrase;
-        searchHistory.count = ui->tableWidget->rowCount();
+        searchHistory.skipDiacritics = appSettings.searchSettings.skipDiacritics;
+        searchHistory.skipCharTypes = appSettings.searchSettings.skipCharTypes;
+        searchHistory.searchPhrase = appSettings.searchSettings.searchPhrase;
+        searchHistory.count = ui->tableView->model()->rowCount();
     }   // History Block
 }
 
@@ -140,23 +149,23 @@ void MainWindow::searchRangeMenuCreator()
     connect(poemAction, &QAction::triggered, this, &MainWindow::actionPoem);
     connect(verseAction, &QAction::triggered, this, &MainWindow::actionVerse);
 
-    appSettings.ss.table = VerseTable;
+    appSettings.searchSettings.table = VerseTable;
     slotSearchTableChanged();
 }
 
 void MainWindow::slotSearchTableChanged()
 {
-    if(appSettings.ss.table == CatTable)
+    if(appSettings.searchSettings.table == CatTable)
         actionCat();
-    else if(appSettings.ss.table == PoemTable)
+    else if(appSettings.searchSettings.table == PoemTable)
         actionPoem();
-    else if(appSettings.ss.table == VerseTable)
+    else if(appSettings.searchSettings.table == VerseTable)
         actionVerse();
 }
 
 void MainWindow::actionCat()
 {
-    appSettings.ss.table = CatTable;
+    appSettings.searchSettings.table = CatTable;
     catAction->setChecked(true);
     poemAction->setChecked(false);
     verseAction->setChecked(false);
@@ -164,7 +173,7 @@ void MainWindow::actionCat()
 
 void MainWindow::actionPoem()
 {
-    appSettings.ss.table = PoemTable;
+    appSettings.searchSettings.table = PoemTable;
     catAction->setChecked(false);
     poemAction->setChecked(true);
     verseAction->setChecked(false);
@@ -172,7 +181,7 @@ void MainWindow::actionPoem()
 
 void MainWindow::actionVerse()
 {
-    appSettings.ss.table = VerseTable;
+    appSettings.searchSettings.table = VerseTable;
     catAction->setChecked(false);
     poemAction->setChecked(false);
     verseAction->setChecked(true);

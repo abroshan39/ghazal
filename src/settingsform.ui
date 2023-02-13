@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>678</width>
-    <height>383</height>
+    <width>755</width>
+    <height>455</height>
    </rect>
   </property>
   <property name="font">
@@ -23,349 +23,412 @@
    <enum>Qt::RightToLeft</enum>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_10">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
+     <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QGroupBox" name="groupBoxText">
-          <property name="accessibleName">
-           <string>class2</string>
-          </property>
-          <property name="title">
-           <string>  فونت نمایش متون  </string>
-          </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_3">
-             <item>
-              <widget class="QRadioButton" name="radioTextSahel">
-               <property name="accessibleName">
-                <string>class2</string>
-               </property>
-               <property name="text">
-                <string>   فونت ساحل</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="radioTextSys">
-               <property name="accessibleName">
-                <string>class2</string>
-               </property>
-               <property name="text">
-                <string>   سیستمی</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_2">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QLabel" name="labelText">
-               <property name="accessibleName">
-                <string>class2</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QDoubleSpinBox" name="spinBoxText">
-               <property name="accessibleName">
-                <string>class2</string>
-               </property>
-               <property name="decimals">
-                <number>1</number>
-               </property>
-               <property name="minimum">
-                <double>1.000000000000000</double>
-               </property>
-               <property name="singleStep">
-                <double>0.100000000000000</double>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="btnText">
-               <property name="accessibleName">
-                <string>class2</string>
-               </property>
-               <property name="text">
-                <string>انتخاب</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QGroupBox" name="groupBoxList">
-          <property name="accessibleName">
-           <string>class2</string>
-          </property>
-          <property name="title">
-           <string>  فونت نمایش لیست  </string>
-          </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_6">
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_5">
-             <item>
-              <widget class="QRadioButton" name="radioListSahel">
-               <property name="accessibleName">
-                <string>class2</string>
-               </property>
-               <property name="text">
-                <string>   فونت ساحل</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="radioListSys">
-               <property name="accessibleName">
-                <string>class2</string>
-               </property>
-               <property name="text">
-                <string>   سیستمی</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer_3">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QLabel" name="labelList">
-               <property name="accessibleName">
-                <string>class2</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QDoubleSpinBox" name="spinBoxList">
-               <property name="accessibleName">
-                <string>class2</string>
-               </property>
-               <property name="decimals">
-                <number>1</number>
-               </property>
-               <property name="minimum">
-                <double>1.000000000000000</double>
-               </property>
-               <property name="singleStep">
-                <double>0.100000000000000</double>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="btnList">
-               <property name="accessibleName">
-                <string>class2</string>
-               </property>
-               <property name="text">
-                <string>انتخاب</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item>
-         <widget class="QGroupBox" name="groupBoxGlo">
-          <property name="accessibleName">
-           <string>class2</string>
-          </property>
-          <property name="title">
-           <string>  فونت سراسری  </string>
-          </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_2">
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout">
-             <item>
-              <widget class="QRadioButton" name="radioGloSahel">
-               <property name="accessibleName">
-                <string>class2</string>
-               </property>
-               <property name="text">
-                <string>   فونت ساحل</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="radioGloSys">
-               <property name="accessibleName">
-                <string>class2</string>
-               </property>
-               <property name="text">
-                <string>   سیستمی</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <spacer name="horizontalSpacer">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item>
-              <widget class="QLabel" name="labelGlo">
-               <property name="accessibleName">
-                <string>class2</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QDoubleSpinBox" name="spinBoxGlo">
-               <property name="accessibleName">
-                <string>class2</string>
-               </property>
-               <property name="decimals">
-                <number>1</number>
-               </property>
-               <property name="minimum">
-                <double>1.000000000000000</double>
-               </property>
-               <property name="singleStep">
-                <double>0.100000000000000</double>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="btnGlo">
-               <property name="accessibleName">
-                <string>class2</string>
-               </property>
-               <property name="text">
-                <string>انتخاب</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-          </layout>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_9">
-        <item>
-         <widget class="QCheckBox" name="darkModeCheckBox">
-          <property name="accessibleName">
-           <string>class2</string>
-          </property>
-          <property name="text">
-           <string>حالت شب</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_2">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="accessibleName">
-           <string>class2</string>
-          </property>
-          <property name="text">
-           <string>فاصلهٔ بین مصرع‌ها در نمایش کنار هم:  </string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSpinBox" name="spinBoxHemistich">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="accessibleName">
-           <string>class2</string>
-          </property>
-          <property name="maximum">
-           <number>200</number>
-          </property>
-          <property name="singleStep">
-           <number>2</number>
-          </property>
-          <property name="value">
-           <number>60</number>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
+       <widget class="QGroupBox" name="groupBoxText">
+        <property name="accessibleName">
+         <string>class2</string>
         </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Expanding</enum>
+        <property name="title">
+         <string>  فونت نمایش متون  </string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <item>
+            <widget class="QRadioButton" name="radioTextSahel">
+             <property name="accessibleName">
+              <string>class2</string>
+             </property>
+             <property name="text">
+              <string>   فونت ساحل</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="radioTextSys">
+             <property name="accessibleName">
+              <string>class2</string>
+             </property>
+             <property name="text">
+              <string>   سیستمی</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="labelText">
+             <property name="accessibleName">
+              <string>class2</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="spinBoxText">
+             <property name="accessibleName">
+              <string>class2</string>
+             </property>
+             <property name="decimals">
+              <number>1</number>
+             </property>
+             <property name="minimum">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnText">
+             <property name="accessibleName">
+              <string>class2</string>
+             </property>
+             <property name="text">
+              <string>انتخاب</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBoxList">
+        <property name="accessibleName">
+         <string>class2</string>
+        </property>
+        <property name="title">
+         <string>  فونت نمایش لیست  </string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <item>
+            <widget class="QRadioButton" name="radioListSahel">
+             <property name="accessibleName">
+              <string>class2</string>
+             </property>
+             <property name="text">
+              <string>   فونت ساحل</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="radioListSys">
+             <property name="accessibleName">
+              <string>class2</string>
+             </property>
+             <property name="text">
+              <string>   سیستمی</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="labelList">
+             <property name="accessibleName">
+              <string>class2</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="spinBoxList">
+             <property name="accessibleName">
+              <string>class2</string>
+             </property>
+             <property name="decimals">
+              <number>1</number>
+             </property>
+             <property name="minimum">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnList">
+             <property name="accessibleName">
+              <string>class2</string>
+             </property>
+             <property name="text">
+              <string>انتخاب</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBoxGlo">
+        <property name="accessibleName">
+         <string>class2</string>
+        </property>
+        <property name="title">
+         <string>  فونت سراسری  </string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <widget class="QRadioButton" name="radioGloSahel">
+             <property name="accessibleName">
+              <string>class2</string>
+             </property>
+             <property name="text">
+              <string>   فونت ساحل</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="radioGloSys">
+             <property name="accessibleName">
+              <string>class2</string>
+             </property>
+             <property name="text">
+              <string>   سیستمی</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLabel" name="labelGlo">
+             <property name="accessibleName">
+              <string>class2</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="spinBoxGlo">
+             <property name="accessibleName">
+              <string>class2</string>
+             </property>
+             <property name="decimals">
+              <number>1</number>
+             </property>
+             <property name="minimum">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="btnGlo">
+             <property name="accessibleName">
+              <string>class2</string>
+             </property>
+             <property name="text">
+              <string>انتخاب</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_9">
+      <item>
+       <widget class="QCheckBox" name="checkBoxDarkMode">
+        <property name="accessibleName">
+         <string>class2</string>
+        </property>
+        <property name="text">
+         <string>حالت شب</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelHemistich">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="accessibleName">
+         <string>class2</string>
+        </property>
+        <property name="text">
+         <string>فاصلهٔ بین مصرع‌ها در نمایش کنار هم:  </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spinBoxHemistich">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="accessibleName">
+         <string>class2</string>
+        </property>
+        <property name="maximum">
+         <number>200</number>
+        </property>
+        <property name="singleStep">
+         <number>2</number>
+        </property>
+        <property name="value">
+         <number>60</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_10">
+      <item>
+       <widget class="QCheckBox" name="checkBoxSaveHistoryOnExit">
+        <property name="accessibleName">
+         <string>class2</string>
+        </property>
+        <property name="text">
+         <string>ذخیره تاریخچه هنگام خروج</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelDeleteHistory">
+        <property name="accessibleName">
+         <string>class2</string>
+        </property>
+        <property name="text">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+a {
+text-decoration: none;
+}
+&lt;/style&gt;&lt;/head&gt;&lt;body&gt;
+&lt;p&gt; (&lt;a href=&quot;deleteHistory&quot;&gt;حذف فایل تاریخچه فعلی&lt;/a&gt;) &lt;/p&gt;
+&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByKeyboard|Qt::LinksAccessibleByMouse</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>0</width>
-          <height>0</height>
+          <width>40</width>
+          <height>20</height>
          </size>
         </property>
        </spacer>
       </item>
+     </layout>
+    </item>
+    <item>
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_7">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_7">
+       <layout class="QVBoxLayout" name="verticalLayout_4">
         <item>
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="labelDataDir">
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="text">
+           <string>دایرکتوری دیتا:  </string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelDatabase">
           <property name="accessibleName">
            <string>class2</string>
           </property>
@@ -374,8 +437,12 @@
           </property>
          </widget>
         </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <widget class="QLineEdit" name="lineEdit">
+         <widget class="QLineEdit" name="lineEditDataDir">
           <property name="accessibleName">
            <string>class2</string>
           </property>
@@ -384,7 +451,7 @@
 background-color: rgb(21, 21, 21);</string>
           </property>
           <property name="text">
-           <string>databasePath</string>
+           <string/>
           </property>
           <property name="frame">
            <bool>false</bool>
@@ -395,7 +462,41 @@ background-color: rgb(21, 21, 21);</string>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="btnBrowse">
+         <widget class="QLineEdit" name="lineEditDatabase">
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(21, 21, 21);</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="frame">
+           <bool>false</bool>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <widget class="QPushButton" name="btnBrowseDataDir">
+          <property name="accessibleName">
+           <string>class2</string>
+          </property>
+          <property name="text">
+           <string>مرور</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnBrowseDatabase">
           <property name="accessibleName">
            <string>class2</string>
           </property>
@@ -406,68 +507,93 @@ background-color: rgb(21, 21, 21);</string>
         </item>
        </layout>
       </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_8">
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_8">
-        <item>
-         <widget class="QPushButton" name="btnApply">
-          <property name="accessibleName">
-           <string>class2</string>
-          </property>
-          <property name="text">
-           <string>اعمال</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btnClose">
-          <property name="accessibleName">
-           <string>class2</string>
-          </property>
-          <property name="text">
-           <string>انصراف</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btnOK">
-          <property name="accessibleName">
-           <string>class2</string>
-          </property>
-          <property name="text">
-           <string>تایید</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_4">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QPushButton" name="btnDefault">
-          <property name="accessibleName">
-           <string>class2</string>
-          </property>
-          <property name="text">
-           <string>  بازگشت به پیش‌فرض  </string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <widget class="QPushButton" name="btnApply">
+        <property name="accessibleName">
+         <string>class2</string>
+        </property>
+        <property name="text">
+         <string>اعمال</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnClose">
+        <property name="accessibleName">
+         <string>class2</string>
+        </property>
+        <property name="text">
+         <string>انصراف</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnOK">
+        <property name="accessibleName">
+         <string>class2</string>
+        </property>
+        <property name="text">
+         <string>تایید</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnDefault">
+        <property name="accessibleName">
+         <string>class2</string>
+        </property>
+        <property name="text">
+         <string>  بازگشت به پیش‌فرض  </string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
    </layout>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>radioTextSahel</tabstop>
+  <tabstop>radioTextSys</tabstop>
+  <tabstop>spinBoxText</tabstop>
+  <tabstop>btnText</tabstop>
+  <tabstop>radioListSahel</tabstop>
+  <tabstop>radioListSys</tabstop>
+  <tabstop>spinBoxList</tabstop>
+  <tabstop>btnList</tabstop>
+  <tabstop>radioGloSahel</tabstop>
+  <tabstop>radioGloSys</tabstop>
+  <tabstop>spinBoxGlo</tabstop>
+  <tabstop>btnGlo</tabstop>
+  <tabstop>checkBoxDarkMode</tabstop>
+  <tabstop>spinBoxHemistich</tabstop>
+  <tabstop>checkBoxSaveHistoryOnExit</tabstop>
+  <tabstop>lineEditDataDir</tabstop>
+  <tabstop>btnBrowseDataDir</tabstop>
+  <tabstop>lineEditDatabase</tabstop>
+  <tabstop>btnBrowseDatabase</tabstop>
+  <tabstop>btnApply</tabstop>
+  <tabstop>btnClose</tabstop>
+  <tabstop>btnOK</tabstop>
+  <tabstop>btnDefault</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

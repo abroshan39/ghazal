@@ -3,7 +3,6 @@
     Publisher: Rosybit
     Url: http://www.rosybit.com
     GitHub: https://github.com/abroshan39/ghazal
-    Version: 1.4
     Author: Aboutaleb Roshan [ab.roshan39@gmail.com]
     License: MIT License
 */
@@ -22,7 +21,6 @@ public:
     enum WorkerType
     {
         Importer,
-        ImporterZip,
         Exporter,
         Remover,
         Vacuumer,
@@ -30,11 +28,11 @@ public:
     };
 
 public:
-    Worker(const WorkerType &type, AppSettings *appSettings, const QString &filePath, bool removePreVersion, int speed);
-    Worker(const WorkerType &type, AppSettings *appSettings, const QString &databasePath, const QStringList &poetIDs, int speed = 1000);
-    Worker(const WorkerType &type, AppSettings *appSettings, const QStringList &poetIDs);
-    Worker(const WorkerType &type, AppSettings *appSettings);
-    Worker(const WorkerType &type, AppSettings *appSettings, QWidget *widget, const QString &searchQuery);
+    Worker(const WorkerType &type, AppSettings *appSettings, const QStringList &filePathsList, bool removePreVersion, int speed);  // Importer Worker
+    Worker(const WorkerType &type, AppSettings *appSettings, const QString &databasePath, const QStringList &poetIDs, int speed);  // Exporter Worker
+    Worker(const WorkerType &type, AppSettings *appSettings, const QStringList &poetIDs);  // Remover Worker
+    Worker(const WorkerType &type, AppSettings *appSettings);  // Vacuumer Worker
+    Worker(const WorkerType &type, AppSettings *appSettings, QStandardItemModel *model, const QString &searchQuery);  // Searcher Worker
 
 signals:
     void finished(WorkerType, QVariant);
@@ -45,9 +43,10 @@ public slots:
 private:
     WorkerType type;
     AppSettings *appSettings;
-    QWidget *widget = nullptr;
+    QStandardItemModel *model;
     QString searchQuery;
     QString filePath;
+    QStringList filePathsList;
     bool removePreVersion;
     int speed;
     QStringList poetIDs;

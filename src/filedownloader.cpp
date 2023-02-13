@@ -3,7 +3,7 @@
                           by Aboutaleb Roshan
              7 Tir, 1396 (3 Shawwal, 1438) (28 June, 2017)
                                 EDITED:
-         18 Mehr, 1400 (3 Rabi' al-Awwal, 1443) (10 October, 2021)
+         29 Tir, 1401 (20 Dhu al-Hijjah, 1443) (20 July, 2022)
                          ab.roshan39@gmail.com
 */
 
@@ -20,35 +20,13 @@ FileDownloader::~FileDownloader()
     cancel();
 }
 
-bool FileDownloader::download(const QString &strUrl, const QString &path)
+void FileDownloader::download(const QUrl &url, const QString &path, bool overwriteIfFileExists, const QString &userFileName)
 {
-    url = QUrl(strUrl);
-    fileInfo.setFile(url.path());
-    QString fileName(fileInfo.fileName());
-
-    if(fileName.isEmpty())
-    {
-        QString error("Download Status: Failed! Please check the address!");
-        qDebug().noquote() << error;
-        emit sigErorr(error);
-        return false;
-    }
-    else
-    {
-        file = new QFile(path + "/" + fileName);
-        if(!file->open((QIODevice::WriteOnly)))
-        {
-            delete file;
-            file = nullptr;
-            return false;
-        }
-
-        qDebug().noquote() << QString("Download Status: Started [%1]").arg(strUrl);
-        emit sigStartDownload();
-
-        startDownload(url);
-    }
-    return true;
+    this->url = url;
+    this->path = path;
+    this->userFileName = userFileName;
+    this->overwriteIfFileExists = overwriteIfFileExists;
+    preStartDownload(url);
 }
 
 void FileDownloader::cancel()
@@ -107,11 +85,72 @@ QString FileDownloader::speedToHuman(double bytesPerMillisecond)
     return QString::number((float)bps / pow(base, 8), 'f', 3) + " YB/sec";
 }
 
-void FileDownloader::startDownload(QUrl url)
+QString FileDownloader::randString(int len)
+{
+    return QUuid::createUuid().toString().remove(QRegularExpression("[^A-Za-z0-9]")).left(len).toUpper();
+}
+
+void FileDownloader::preStartDownload(const QUrl &url)
+{
+    this->url = url;  // Assignment again, If redirection occurs.
+
+    if(!userFileName.isEmpty())
+    {
+        fileName = userFileName;
+    }
+    else
+    {
+        fileName = QFileInfo(url.path()).fileName();
+        fileNameList << fileName;
+        if(fileNameList.count() > 1 && !fileName.contains("."))
+        {
+            for(int i = fileNameList.count() - 2; i >= 0; i--)
+            {
+                if(fileNameList[i].contains("."))
+                    fileName = fileNameList[i];
+            }
+        }
+    }
+
+    if(fileName.isEmpty())
+        fileName = "index.html";
+
+    QString filePath = path + "/" + fileName;
+    originalFileName = fileName;
+    if(QFileInfo(filePath).isFile())
+    {
+        if(!overwriteIfFileExists)
+        {
+            fileName = randString(24) + "-" + fileName;
+            renamedFileName = fileName;
+        }
+    }
+
+    file = new QFile(path + "/" + fileName);
+    if(!file->open((QIODevice::WriteOnly)))
+    {
+        delete file;
+        file = nullptr;
+
+        clearVariables();
+
+        QString error("Download Status: Error [Failed to open file!]");
+        qDebug().noquote() << error;
+        emit sigErorr(error);
+        return;
+    }
+
+    qDebug().noquote() << QString("Download Status: Started [%1]").arg(url.toString());
+    emit sigStartDownload();
+
+    startDownload(url);
+}
+
+void FileDownloader::startDownload(const QUrl &url)
 {
     canceled = false;
     errorOccurred = false;
-    strError = "";
+    strError.clear();
     reply = manager->get(QNetworkRequest(url));
 
     connect(reply, &QIODevice::readyRead, this, &FileDownloader::streamReceived);
@@ -130,6 +169,39 @@ void FileDownloader::startDownload(QUrl url)
     eTimer.start();
 }
 
+void FileDownloader::redirectTo(const QUrl &newUrl)
+{
+    disconnect(reply, &QIODevice::readyRead, this, &FileDownloader::streamReceived);
+    disconnect(reply, &QNetworkReply::downloadProgress, this, &FileDownloader::updateProgress);
+    disconnect(reply, &QNetworkReply::finished, this, &FileDownloader::downloadFinished);
+    disconnect(reply, &QNetworkReply::sslErrors, this, &FileDownloader::networkSslErrors);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)  // #if QT_VERSION >= 0x050F00
+    disconnect(reply, &QNetworkReply::errorOccurred, this, &FileDownloader::networkError);
+#else
+    disconnect(reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(networkError(QNetworkReply::NetworkError)));
+#endif
+
+    if(reply)
+    {
+        reply->deleteLater();
+        reply = nullptr;
+    }
+
+    file->remove();
+    preStartDownload(newUrl);
+}
+
+void FileDownloader::clearVariables()
+{
+    path.clear();
+    originalFileName.clear();
+    renamedFileName.clear();
+    userFileName.clear();
+    fileName.clear();
+    fileNameList.clear();
+    overwriteIfFileExists = false;
+}
+
 void FileDownloader::streamReceived()
 {
     if(file)
@@ -140,7 +212,6 @@ void FileDownloader::updateProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     if(!canceled && !errorOccurred)
     {
-        QString fileName(fileInfo.fileName());
         qint64 useTime = eTimer.elapsed();
 
         double speed = bytesReceived / useTime;
@@ -168,7 +239,29 @@ void FileDownloader::downloadFinished()
 {
     if(file)
     {
+        file->flush();
         file->close();
+    }
+
+    QVariant redirect = reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
+    if(!redirect.isNull())
+    {
+        QUrl newUrl = url.resolved(redirect.toUrl());
+        qDebug().noquote() << QString("Download Status: Redirect to \"%1\"").arg(newUrl.toString());
+        emit sigRedirect(newUrl);
+        redirectTo(newUrl);
+        return;
+    }
+
+    QString downloadedFilePath(QFileInfo(path + "/" + fileName).absoluteFilePath());
+    QString oFileName(originalFileName);
+    QString rFileName(renamedFileName);
+    QString uFileName(userFileName);
+
+    clearVariables();
+
+    if(file)
+    {
         delete file;
         file = nullptr;
     }
@@ -193,14 +286,8 @@ void FileDownloader::downloadFinished()
         return;
     }
 
-    // if(!errorOccurred)
-    // {
-    //     qDebug().noquote() << "Download Status: Finished";
-    //     emit sigFinished();
-    // }
-
-    qDebug().noquote() << "Download Status: Finished";
-    emit sigFinished();
+    qDebug().noquote() << QString("%1\nDownload Status: Finished").arg(QDir::toNativeSeparators(downloadedFilePath));
+    emit sigFinished(downloadedFilePath, oFileName, rFileName, uFileName);
 }
 
 void FileDownloader::networkSslErrors(const QList<QSslError> &errors)

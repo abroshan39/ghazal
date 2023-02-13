@@ -3,7 +3,6 @@
     Publisher: Rosybit
     Url: http://www.rosybit.com
     GitHub: https://github.com/abroshan39/ghazal
-    Version: 1.4
     Author: Aboutaleb Roshan [ab.roshan39@gmail.com]
     License: MIT License
 */
@@ -34,7 +33,7 @@ public:
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;
-    void closeEvent(QCloseEvent *event) override;
+    void closeEvent(QCloseEvent *e) override;
 
 private slots:
     void on_checkBox_toggled(bool checked);

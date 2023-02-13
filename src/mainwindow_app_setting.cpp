@@ -3,7 +3,6 @@
     Publisher: Rosybit
     Url: http://www.rosybit.com
     GitHub: https://github.com/abroshan39/ghazal
-    Version: 1.4
     Author: Aboutaleb Roshan [ab.roshan39@gmail.com]
     License: MIT License
 */
@@ -21,16 +20,22 @@ void MainWindow::loadDefaultFonts()
     QFontDatabase::addApplicationFont(":/files/fonts/Sahel-Bold.ttf");
     QFontDatabase::addApplicationFont(":/files/fonts/Sahel-FD.ttf");
     QFontDatabase::addApplicationFont(":/files/fonts/Sahel-Bold-FD.ttf");
+    QFontDatabase::addApplicationFont(":/files/fonts/OpenSans-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/files/fonts/OpenSans-Bold.ttf");
+    QFontDatabase::addApplicationFont(":/files/fonts/OpenSans-Medium.ttf");
+    QFontDatabase::addApplicationFont(":/files/fonts/SourceCodePro-Regular.ttf");
+    QFontDatabase::addApplicationFont(":/files/fonts/SourceCodePro-Bold.ttf");
 }
 
 void MainWindow::writeSettings()
 {
-    QSettings settings(QString("%1/%2/%3").arg(rosybitDir()).arg(appNameOS()).arg(Constants::SettingsFileName), QSettings::IniFormat);
+    QSettings settings(QString("%1/%2").arg(dataDir(), Constants::SettingsFileName), QSettings::IniFormat);
 
-    settings.setValue("General/MainDatabase", appSettings.mainDBPath);
+    settings.setValue("General/MainDatabase", createRelativePathIfPossible(appSettings.mainDBPath, FileDirType::File));
     settings.setValue("General/PoemDisplayType", appSettings.pDisplayType);
-    settings.setValue("General/ShowBookmarks", (int)appSettings.showBookmarks);
     settings.setValue("General/DarkMode", (int)appSettings.isDarkMode);
+    settings.setValue("General/ShowBookmarks", (int)appSettings.showBookmarks);
+    settings.setValue("General/SaveHistoryOnExit", (int)appSettings.saveHistoryOnExit);
     settings.setValue("General/HemistichDistance", appSettings.hemistichDistance);
     settings.setValue("Font/AppFontName", appSettings.appFN);
     settings.setValue("Font/AppFontSize", appSettings.appFS);
@@ -38,8 +43,10 @@ void MainWindow::writeSettings()
     settings.setValue("Font/ListFontSize", appSettings.listFS);
     settings.setValue("Font/ViewFontName", appSettings.viewFN);
     settings.setValue("Font/ViewFontSize", appSettings.viewFS);
-    settings.setValue("Search/SkipDiacritics", (int)appSettings.ss.skipDiacritics);
-    settings.setValue("Search/SkipCharTypes", (int)appSettings.ss.skipCharTypes);
+    settings.setValue("Search/SkipDiacritics", (int)appSettings.searchSettings.skipDiacritics);
+    settings.setValue("Search/SkipCharTypes", (int)appSettings.searchSettings.skipCharTypes);
+    settings.setValue("Search/SearchMethod", (int)appSettings.searchSettings.method);
+    settings.setValue("Search/ShowItemsDuringSearch", (int)appSettings.searchSettings.showItemsDuringSearch);
 
     settings.setValue("Startup/PoetSplitterSizeI0", ui->splitter->sizes().at(0));
     settings.setValue("Startup/PoetSplitterSizeI1", ui->splitter->sizes().at(1));
@@ -53,12 +60,13 @@ void MainWindow::writeSettings()
 
 void MainWindow::readSettings()
 {
-    QSettings settings(QString("%1/%2/%3").arg(rosybitDir()).arg(appNameOS()).arg(Constants::SettingsFileName), QSettings::IniFormat);
+    QSettings settings(QString("%1/%2").arg(dataDir(), Constants::SettingsFileName), QSettings::IniFormat);
 
-    appSettings.mainDBPath = settings.value("General/MainDatabase").toString();
+    appSettings.mainDBPath = settings.value("General/MainDatabase").toString().trimmed();
     appSettings.pDisplayType = static_cast<PoemDisplayType>(settings.value("General/PoemDisplayType", "0").toInt());
-    appSettings.showBookmarks = settings.value("General/ShowBookmarks", "1").toInt();
     appSettings.isDarkMode = settings.value("General/DarkMode", "0").toInt();
+    appSettings.showBookmarks = settings.value("General/ShowBookmarks", "1").toInt();
+    appSettings.saveHistoryOnExit = settings.value("General/SaveHistoryOnExit", "1").toInt();
     appSettings.hemistichDistance = settings.value("General/HemistichDistance", "60").toInt();
     appSettings.appFN = settings.value("Font/AppFontName", "Sahel").toString();
     appSettings.appFS = settings.value("Font/AppFontSize", "10.5").toString();
@@ -66,51 +74,61 @@ void MainWindow::readSettings()
     appSettings.listFS = settings.value("Font/ListFontSize", "11").toString();
     appSettings.viewFN = settings.value("Font/ViewFontName", "Sahel").toString();
     appSettings.viewFS = settings.value("Font/ViewFontSize", "11").toString();
-    appSettings.ss.skipDiacritics = settings.value("Search/SkipDiacritics", "0").toInt();
-    appSettings.ss.skipCharTypes = settings.value("Search/SkipCharTypes", "0").toInt();
-
-    StartupSettings startupSettings;
-    startupSettings.poetSplitterSize << settings.value("Startup/PoetSplitterSizeI0", "1000").toInt();
-    startupSettings.poetSplitterSize << settings.value("Startup/PoetSplitterSizeI1", "4000").toInt();
-    ui->splitter->setSizes(startupSettings.poetSplitterSize);
-    startupSettings.isMaximized = settings.value("Startup/Maximized", "1").toInt();
-    startupSettings.mainWindowSize = settings.value("Startup/Size", QSize(968, 520)).toSize();
-    resize(startupSettings.mainWindowSize);
-    startupSettings.mainWindowPos = settings.value("Startup/Pos", QStyle::alignedRect(Qt::RightToLeft, Qt::AlignCenter, size(), QGuiApplication::primaryScreen()->availableGeometry()).topLeft()).toPoint();
-    move(startupSettings.mainWindowPos);
-    if(startupSettings.isMaximized)
-        setWindowState(Qt::WindowMaximized);
+    appSettings.searchSettings.skipDiacritics = settings.value("Search/SkipDiacritics", "0").toInt();
+    appSettings.searchSettings.skipCharTypes = settings.value("Search/SkipCharTypes", "0").toInt();
+    appSettings.searchSettings.method = static_cast<SearchMethod>(settings.value("Search/SearchMethod", "0").toInt());
+    appSettings.searchSettings.showItemsDuringSearch = settings.value("Search/ShowItemsDuringSearch", "1").toInt();
 
     appSettings.listWidget = ui->listWidget;
     appSettings.tabWidget = ui->tabWidget;
     appSettings.viewFSCurrent = appSettings.viewFS;
-    appSettings.ss.allItemsSelected = true;
-    appSettings.ss.searchState = false;
-    appSettings.ss.isSearching = false;
+    appSettings.screenRatio = calculateScreenRatio();
+    appSettings.searchSettings.allItemsSelected = true;
+    appSettings.hemistichDistanceMin = 0;
+    appSettings.hemistichDistanceMax = 1000;
     appSettings.isOpenWordSearchForm = false;
     appSettings.isOpenAbjadForm = false;
     appSettings.isOpenAbjadFormMini = false;
+    appSettings.searchSettings.table = VerseTable;
+    appSettings.searchSettings.isSearching = false;
+    appSettings.inSearchSettings = &inSearchSettings;
+    inSearchSettings.isSearching = false;
 
-    if(!QFile::exists(appSettings.mainDBPath) || !isStdGanjoorDB(appSettings.mainDBPath))
+    if(!appSettings.mainDBPath.isEmpty())
+        appSettings.mainDBPath = absolutePath(appSettings.mainDBPath);
+
+    if(!QFileInfo(appSettings.mainDBPath).isFile() || !isStdGanjoorDB(appSettings.mainDBPath))
         appSettings.mainDBPath = defaultDBPath();
 
     if(!(appSettings.pDisplayType == Joft || appSettings.pDisplayType == Tak))
         appSettings.pDisplayType = Joft;
-
-    appSettings.hemistichDistanceMin = 0;
-    appSettings.hemistichDistanceMax = 200;
 
     if(appSettings.hemistichDistance < appSettings.hemistichDistanceMin)
         appSettings.hemistichDistance = appSettings.hemistichDistanceMin;
     else if(appSettings.hemistichDistance > appSettings.hemistichDistanceMax)
         appSettings.hemistichDistance = appSettings.hemistichDistanceMax;
 
-    appSettings.ss.table = VerseTable;
+    if(!(appSettings.searchSettings.method == Method1 || appSettings.searchSettings.method == Method2))
+        appSettings.searchSettings.method = Method1;
+
+    StartupSettings startupSettings;
+    int s_size1 = (size().width() * 4) / 5;
+    int s_size0 = size().width() - s_size1;
+    startupSettings.poetSplitterSize << settings.value("Startup/PoetSplitterSizeI0", QString::number(s_size0)).toInt();
+    startupSettings.poetSplitterSize << settings.value("Startup/PoetSplitterSizeI1", QString::number(s_size1)).toInt();
+    ui->splitter->setSizes(startupSettings.poetSplitterSize);
+    startupSettings.isMaximized = settings.value("Startup/Maximized", "1").toInt();
+    startupSettings.mainWindowSize = settings.value("Startup/Size", QSize((int)(968 * appSettings.screenRatio), (int)(520 * appSettings.screenRatio))).toSize();
+    resize(startupSettings.mainWindowSize);
+    startupSettings.mainWindowPos = settings.value("Startup/Pos", QStyle::alignedRect(Qt::RightToLeft, Qt::AlignCenter, size(), QGuiApplication::primaryScreen()->availableGeometry()).topLeft()).toPoint();
+    move(startupSettings.mainWindowPos);
+    if(startupSettings.isMaximized)
+        setWindowState(Qt::WindowMaximized);
 }
 
 void MainWindow::writeHistory()
 {
-    QString historyFilePath = QString("%1/%2/%3").arg(rosybitDir()).arg(appNameOS()).arg(Constants::HistoryFileName);
+    QString historyFilePath = QString("%1/%2").arg(dataDir(), Constants::HistoryFileName);
     QFile::remove(historyFilePath);
     QSettings settings(historyFilePath, QSettings::IniFormat);
 
@@ -131,7 +149,7 @@ void MainWindow::writeHistory()
 
 void MainWindow::readHistory()
 {
-    QString historyFilePath = QString("%1/%2/%3").arg(rosybitDir()).arg(appNameOS()).arg(Constants::HistoryFileName);
+    QString historyFilePath = QString("%1/%2").arg(dataDir(), Constants::HistoryFileName);
     QSettings settings(historyFilePath, QSettings::IniFormat);
     QWidget *pActiveTab = nullptr;
     QString valueActiveTab;
@@ -177,9 +195,12 @@ void MainWindow::readHistory()
     }
 }
 
-void MainWindow::widgetsStartup()
+void MainWindow::startup()
 {
-    ui->splitter_2->setSizes({4000, 0});
+    setAcceptDrops(true);
+    setTableViewModel(new QStandardItemModel);  // Don't remove this line
+
+    ui->splitter_2->setSizes({size().height(), 0});
     ui->progressBarSearch->hide();
     ui->progressBarSearch->setMaximum(0);
     ui->btnBookmarkForm->hide();
@@ -187,6 +208,16 @@ void MainWindow::widgetsStartup()
 
     if(!ui->tabWidget->count())
         actionNewTab();
+
+    int dSectionSize = 350;
+    int n = dSectionSize * appSettings.screenRatio;
+    int add = (n - dSectionSize) / 2;
+    add = add < 0 ? 0 : add;
+    ui->tableView->horizontalHeader()->setDefaultSectionSize(dSectionSize + add);
+    ui->tableView->horizontalHeader()->setStretchLastSection(true);
+    ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
 void MainWindow::applyStyleSheet()

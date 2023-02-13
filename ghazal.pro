@@ -17,10 +17,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 OUTPUT_FILE_NAME_UNIX = "ghazal"
 OUTPUT_FILE_NAME_WIN = "Ghazal"
+OUTPUT_FILE_NAME_MAC = "Ghazal"
 QUAZIP_LIB_NAME_UNIX = "quazip1-qt5"
 QUAZIP_LIB_NAME_WIN = "quazip1-qt5"
+QUAZIP_LIB_NAME_MAC = "quazip1-qt5"
 
-unix {
+unix:!mac {
     TARGET = $$OUTPUT_FILE_NAME_UNIX
     LIBS += -L$$PWD/libraries/unix/quazip -l$$QUAZIP_LIB_NAME_UNIX
 }
@@ -29,6 +31,11 @@ win32 {
     TARGET = $$OUTPUT_FILE_NAME_WIN
     LIBS += -L$$PWD/libraries/win/quazip -l$$QUAZIP_LIB_NAME_WIN
     RC_FILE = $$PWD/resources/resource_win.rc
+}
+
+mac {
+    TARGET = $$OUTPUT_FILE_NAME_MAC
+    LIBS += -L$$PWD/libraries/mac/quazip -l$$QUAZIP_LIB_NAME_MAC
 }
 
 INCLUDEPATH += $$PWD/libraries/include
@@ -51,6 +58,8 @@ HEADERS += \
     src/searchform.h \
     src/settingsform.h \
     src/tabform.h \
+    src/updatecheckform.h \
+    src/version.h \
     src/wordsearchform.h \
     src/worker.h
 
@@ -78,6 +87,7 @@ SOURCES += \
     src/settingsform.cpp \
     src/tabform.cpp \
     src/tabform_context_menu.cpp \
+    src/updatecheckform.cpp \
     src/wordsearchform.cpp \
     src/worker.cpp
 
@@ -93,6 +103,7 @@ FORMS += \
     src/searchform.ui \
     src/settingsform.ui \
     src/tabform.ui \
+    src/updatecheckform.ui \
     src/wordsearchform.ui
 
 RESOURCES += \

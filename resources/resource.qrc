@@ -1,12 +1,18 @@
 <RCC>
     <qresource prefix="/files">
+        <file>fonts/OpenSans-Bold.ttf</file>
+        <file>fonts/OpenSans-Medium.ttf</file>
+        <file>fonts/OpenSans-Regular.ttf</file>
         <file>fonts/Sahel.ttf</file>
         <file>fonts/Sahel-Bold.ttf</file>
         <file>fonts/Sahel-FD.ttf</file>
         <file>fonts/Sahel-Bold-FD.ttf</file>
+        <file>fonts/SourceCodePro-Bold.ttf</file>
+        <file>fonts/SourceCodePro-Regular.ttf</file>
         <file>html/about_author.html</file>
         <file>html/about_ghazal.html</file>
         <file>html/search_examples.html</file>
+        <file>html/update_check.html</file>
         <file>images/ghazal-256x256.png</file>
         <file>images/hafez.svg</file>
         <file>images/hafez-white.svg</file>

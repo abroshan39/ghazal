@@ -3,7 +3,6 @@
     Publisher: Rosybit
     Url: http://www.rosybit.com
     GitHub: https://github.com/abroshan39/ghazal
-    Version: 1.4
     Author: Aboutaleb Roshan [ab.roshan39@gmail.com]
     License: MIT License
 */
@@ -11,14 +10,13 @@
 #include "worker.h"
 #include <JlCompress.h>
 
-Worker::Worker(const Worker::WorkerType &type, AppSettings *appSettings, const QString &filePath, bool removePreVersion, int speed)
+Worker::Worker(const Worker::WorkerType &type, AppSettings *appSettings, const QStringList &filePathsList, bool removePreVersion, int speed)
 {
     // Importer Worker
-    // ImporterZip Worker
 
     this->type = type;
     this->appSettings = appSettings;
-    this->filePath = filePath;
+    this->filePathsList = filePathsList;
     this->removePreVersion = removePreVersion;
     this->speed = speed;
 }
@@ -51,13 +49,13 @@ Worker::Worker(const Worker::WorkerType &type, AppSettings *appSettings)
     this->appSettings = appSettings;
 }
 
-Worker::Worker(const Worker::WorkerType &type, AppSettings *appSettings, QWidget *widget, const QString &searchQuery)
+Worker::Worker(const Worker::WorkerType &type, AppSettings *appSettings, QStandardItemModel *model, const QString &searchQuery)
 {
     // Searcher Worker
 
     this->type = type;
     this->appSettings = appSettings;
-    this->widget = widget;
+    this->model = model;
     this->searchQuery = searchQuery;
 }
 
@@ -68,35 +66,47 @@ void Worker::process()
     qRegisterMetaType<QVector<int> >("QVector<int>");
     qRegisterMetaType<Qt::Orientation>("Qt::Orientation");
     qRegisterMetaType<WorkerType>("WorkerType");
+    qRegisterMetaType<QList<QPersistentModelIndex> >("QList<QPersistentModelIndex>");
+    qRegisterMetaType<QAbstractItemModel::LayoutChangeHint>("QAbstractItemModel::LayoutChangeHint");
 
     if(type == Importer)
     {
-        if(isStdGanjoorDB(filePath))
-            importDatabase(appSettings->mainDB, filePath, removePreVersion, speed);
-        else
-            qDebug().noquote() << "Cannot open the input file as a database file!";
-    }
-    else if(type == ImporterZip)
-    {
-        QDir qDir(QDir::tempPath());
-        QString unzipDirName = Constants::Rosybit.toLower() + "-" + randString();
-
-        if(qDir.mkdir(unzipDirName))
+        for(int i = 0; i < filePathsList.count(); i++)
         {
-            QStringList list = JlCompress::getFileList(filePath);
-            QStringList dbList;
+            filePath = filePathsList[i];
+            if(filePath.endsWith(".zip", Qt::CaseInsensitive))
+            {
+                QDir tempDir(QDir::tempPath());
+                QString unzipDirName = Constants::Rosybit.toLower() + "-" + randString();
 
-            for(int i = 0; i < list.count(); i++)
-                if(dbExtCheck(list[i]))
-                    dbList << list[i];
+                if(tempDir.mkdir(unzipDirName))
+                {
+                    QStringList list = JlCompress::getFileList(filePath);
+                    QStringList dbList;
 
-            dbList = JlCompress::extractFiles(filePath, dbList, qDir.path() + "/" + unzipDirName);
+                    for(int j = 0; j < list.count(); j++)
+                        if(dbExtCheck(list[j]))
+                            dbList << list[j];
 
-            for(int i = 0; i < dbList.count(); i++)
-                if(isStdGanjoorDB(dbList[i]))
-                    importDatabase(appSettings->mainDB, dbList[i], removePreVersion, speed);
+                    dbList = JlCompress::extractFiles(filePath, dbList, tempDir.path() + "/" + unzipDirName);
 
-            removeTempDir(unzipDirName);
+                    for(int j = 0; j < dbList.count(); j++)
+                    {
+                        if(isStdGanjoorDB(dbList[j]))
+                            importDatabase(appSettings->mainDB, dbList[j], removePreVersion, speed);
+                        else
+                            qDebug().noquote() << QString("Cannot open the input file as a database file! [%1]").arg(dbList[j]);
+                    }
+                    removeTempDir(unzipDirName);
+                }
+            }
+            else
+            {
+                if(isStdGanjoorDB(filePath))
+                    importDatabase(appSettings->mainDB, filePath, removePreVersion, speed);
+                else
+                    qDebug().noquote() << QString("Cannot open the input file as a database file! [%1]").arg(filePath);
+            }
         }
     }
     else if(type == Exporter)
@@ -116,7 +126,12 @@ void Worker::process()
     }
     else if(type == Searcher)
     {
-        result = searchTableWidget(appSettings, static_cast<QTableWidget *>(widget), searchQuery);
+        if(searchQuery == Constants::MARKER_RADIF)
+            searchRadifTableView(model, appSettings->mainDB, appSettings->inSearchSettings, appSettings->searchSettings.allItemsSelected, appSettings->searchSettings.poetIDList, appSettings->searchSettings.searchPhrase, appSettings->searchSettings.skipDiacritics, appSettings->searchSettings.skipCharTypes);
+        else if(searchQuery == Constants::MARKER_GHAFIE)
+            searchGhafieTableView(model, appSettings->mainDB, appSettings->inSearchSettings, appSettings->searchSettings.allItemsSelected, appSettings->searchSettings.poetIDList, appSettings->searchSettings.searchPhrase, appSettings->searchSettings.skipDiacritics, appSettings->searchSettings.skipCharTypes);
+        else
+            result = searchTableView(model, appSettings->mainDB, appSettings->inSearchSettings, appSettings->searchSettings.method, appSettings->searchSettings.allItemsSelected, appSettings->searchSettings.poetIDList, searchQuery, appSettings->searchSettings.searchPhrase, appSettings->searchSettings.table, appSettings->searchSettings.skipDiacritics, appSettings->searchSettings.skipCharTypes);
     }
 
     emit finished(type, result);
